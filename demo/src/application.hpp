@@ -14,11 +14,11 @@ public:
     DemoApplication();
 
 private:
-    OpenGLContext context;
+    lixy::OpenGLContext context;
 
-    std::shared_ptr<Shader> shader;
+    std::shared_ptr<lixy::Shader> shader;
 
-    std::shared_ptr<VertexBuffer> vertex_buffer;
-    std::shared_ptr<IndexBuffer> index_buffer;
-    std::shared_ptr<VertexArrayBuffer> vertex_array_buffer;
+    std::shared_ptr<lixy::VertexBuffer> vertex_buffer;
+    std::shared_ptr<lixy::IndexBuffer> index_buffer;
+    std::shared_ptr<lixy::VertexArrayBuffer> vertex_array_buffer;
 };

@@ -10,47 +10,50 @@
 #include <memory>
 
 
-class VertexBuffer {
-public:
-    void bind();
-    void unbind();
+namespace lixy {
 
-    VertexBuffer(const void *p_vertices, uint32_t p_size);
-    VertexBuffer(const VertexBuffer &p_other) = delete;
-    VertexBuffer(VertexBuffer &&p_other);
-    virtual ~VertexBuffer();
+    class VertexBuffer {
+    public:
+        void bind();
+        void unbind();
 
-private:
-    uint32_t buffer_id;
-};
+        VertexBuffer(const void *p_vertices, uint32_t p_size);
+        VertexBuffer(const VertexBuffer &p_other) = delete;
+        VertexBuffer(VertexBuffer &&p_other);
+        virtual ~VertexBuffer();
 
-
-class IndexBuffer {
-public:
-    void bind();
-    void unbind();
-
-    IndexBuffer(const uint32_t *p_indices, uint32_t p_size);
-    IndexBuffer(const IndexBuffer &p_other) = delete;
-    virtual ~IndexBuffer();
-
-private:
-    uint32_t buffer_id;
-};
+    private:
+        uint32_t buffer_id;
+    };
 
 
-class VertexArrayBuffer {
-public:
-    void bind();
-    void unbind();
+    class IndexBuffer {
+    public:
+        void bind();
+        void unbind();
 
-    VertexArrayBuffer(std::shared_ptr<VertexBuffer> p_vertex_buffer, std::shared_ptr<IndexBuffer> p_index_buffer, const ShaderDataType *p_layout, uint32_t p_layout_size);
-    VertexArrayBuffer(const VertexArrayBuffer&) = delete;
-    virtual ~VertexArrayBuffer();
+        IndexBuffer(const uint32_t *p_indices, uint32_t p_size);
+        IndexBuffer(const IndexBuffer &p_other) = delete;
+        virtual ~IndexBuffer();
 
-private:
-    uint32_t array_index;
+    private:
+        uint32_t buffer_id;
+    };
 
-    std::shared_ptr<VertexBuffer> vertex_buffer;
-    std::shared_ptr<IndexBuffer> index_buffer;
-};
+
+    class VertexArrayBuffer {
+    public:
+        void bind();
+        void unbind();
+
+        VertexArrayBuffer(std::shared_ptr<VertexBuffer> p_vertex_buffer, std::shared_ptr<IndexBuffer> p_index_buffer, const ShaderDataType *p_layout, uint32_t p_layout_size);
+        VertexArrayBuffer(const VertexArrayBuffer&) = delete;
+        virtual ~VertexArrayBuffer();
+
+    private:
+        uint32_t array_index;
+
+        std::shared_ptr<VertexBuffer> vertex_buffer;
+        std::shared_ptr<IndexBuffer> index_buffer;
+    };
+}

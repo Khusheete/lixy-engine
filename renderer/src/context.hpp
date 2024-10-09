@@ -9,25 +9,28 @@
 #include <GLFW/glfw3.h>
 
 
-class OpenGLContext {
-public:
-    void initialize();
+namespace lixy {
 
-    void set_current();
+    class OpenGLContext {
+    public:
+        void initialize();
 
-    // ===== Window API =====
-    void window_set_title(const std::string &p_title);
-    bool window_should_close();
-    void swap_buffers();
+        void set_current();
+
+        // ===== Window API =====
+        void window_set_title(const std::string &p_title);
+        bool window_should_close();
+        void swap_buffers();
 
 
-    OpenGLContext() = default;
-    OpenGLContext(const OpenGLContext&) = delete;
-    OpenGLContext(OpenGLContext&&) = delete;
-    virtual ~OpenGLContext();
+        OpenGLContext() = default;
+        OpenGLContext(const OpenGLContext&) = delete;
+        OpenGLContext(OpenGLContext&&) = delete;
+        virtual ~OpenGLContext();
 
-private:
-    static int instance_count;
+    private:
+        static int instance_count;
 
-    GLFWwindow *window;
-};
+        GLFWwindow *window;
+    };
+}

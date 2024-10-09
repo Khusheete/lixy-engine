@@ -22,5 +22,6 @@ function build_include_dirs()
 end
 
 
+include "thirdparty/build.lua"
 include "renderer/build.lua"
 include "demo/build.lua"

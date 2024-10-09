@@ -19,6 +19,6 @@ project "Renderer"
         defines { "NDEBUG" }
         symbols "On"
     
-    filter "configurations:Release"
+    filter "configurations:release"
         defines { "NDEBUG" }
         optimize "On"

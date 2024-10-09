@@ -1,0 +1,19 @@
+# Vscode
+.vscode
+
+# Compile artefacts
+obj
+bin
+lib
+**/*.o
+.cache
+compile_commands
+compile_commands.json
+.sconsign.dblite
+
+Makefile
+**.make
+
+# Logs
+**/*.log
+**/*.rdc

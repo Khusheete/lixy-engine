@@ -19,7 +19,7 @@ void DemoApplication::main_loop() {
         vertex_array_buffer->bind();
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-        
+
         vertex_array_buffer->unbind();
         shader->unbind();
 
@@ -59,7 +59,7 @@ DemoApplication::DemoApplication() {
 
     // Create shader
     shader = std::make_shared<Shader>(
-        Shader::load_shader_program("shaders/shader.vert", "shaders/shader.frag")
+        Shader::load_shader_program("assets/shaders/shader.vert", "assets/shaders/shader.frag")
     );
     ASSERT_FATAL_ERROR(shader->is_valid(), shader->get_errors());
 }

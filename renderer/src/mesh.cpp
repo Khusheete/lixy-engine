@@ -21,8 +21,7 @@ namespace lixy {
 
     void ArrayMesh::record_draw() const {
         for (const Surface &surface : surfaces) {
-            const ShaderProgram &program = surface.material.get<Material>()->get_shader_program();
-            program.bind();
+            surface.material.get<Material>()->bind_material();
             surface.vertex_array.bind();
             glDrawElements(GL_TRIANGLES, surface.index_count, GL_UNSIGNED_INT, nullptr);
         }

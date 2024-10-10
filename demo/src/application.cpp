@@ -7,6 +7,7 @@
 #include "renderer/src/mesh.hpp"
 #include "renderer/src/module.hpp"
 #include "renderer/src/renderer.hpp"
+#include "thirdparty/glm/fwd.hpp"
 
 #include <GL/gl.h>
 #include <array>
@@ -29,10 +30,13 @@ DemoApplication::DemoApplication() {
 
     // Create material
     lixy::EntityRef material = lixy::Material::load(world, "assets/shaders/shader.vert", "assets/shaders/shader.frag");
+    lixy::Material *material_component = material.get_mut<lixy::Material>();
     ASSERT_FATAL_ERROR(
-        material.get<lixy::Material>()->is_valid(),
-        "Failed to load shaders" << material.get<lixy::Material>()->get_errors()
+        material_component->is_valid(),
+        "Failed to load shaders" << material_component->get_errors()
     );
+    material_component->set_uniform("u_color", glm::vec3(1.0, 0.0, 1.0));
+
 
     // Create mesh
     std::vector<lixy::Vertex> vertices = {

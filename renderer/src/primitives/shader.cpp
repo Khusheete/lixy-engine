@@ -1,9 +1,14 @@
 #include "shader.hpp"
+
 #include "debug/debug.hpp"
 
+#include "thirdparty/glm/glm.hpp"
+
+#include <algorithm>
 #include <asm-generic/errno-base.h>
 #include <sstream>
 #include <vector>
+
 
 
 namespace lixy {
@@ -12,8 +17,115 @@ namespace lixy {
     }
 
 
+    void ShaderProgram::bind_uniform(const std::string &p_uniform_name, const float &p_value) {
+        int32_t location = _get_uniform_location(p_uniform_name);
+        if (location == -1) return;
+        glUniform1f(location, p_value);
+    }
+    
+    
+    void ShaderProgram::bind_uniform(const std::string &p_uniform_name, const glm::vec2 &p_value) {
+        int32_t location = _get_uniform_location(p_uniform_name);
+        if (location == -1) return;
+        glUniform2f(location, p_value.x, p_value.y);
+    }
+    
+    
+    void ShaderProgram::bind_uniform(const std::string &p_uniform_name, const glm::vec3 &p_value) {
+        int32_t location = _get_uniform_location(p_uniform_name);
+        if (location == -1) return;
+        glUniform3f(location, p_value.x, p_value.y, p_value.z);
+    }
+    
+    
+    void ShaderProgram::bind_uniform(const std::string &p_uniform_name, const glm::vec4 &p_value) {
+        int32_t location = _get_uniform_location(p_uniform_name);
+        if (location == -1) return;
+        glUniform4f(location, p_value.x, p_value.y, p_value.z, p_value.w);
+    }
+    
+    
+    void ShaderProgram::bind_uniform(const std::string &p_uniform_name, const int &p_value) {
+        int32_t location = _get_uniform_location(p_uniform_name);
+        if (location == -1) return;
+        glUniform1i(location, p_value);
+    }
+    
+    
+    void ShaderProgram::bind_uniform(const std::string &p_uniform_name, const glm::ivec2 &p_value) {
+        int32_t location = _get_uniform_location(p_uniform_name);
+        if (location == -1) return;
+        glUniform2i(location, p_value.x, p_value.y);
+    }
+    
+    
+    void ShaderProgram::bind_uniform(const std::string &p_uniform_name, const glm::ivec3 &p_value) {
+        int32_t location = _get_uniform_location(p_uniform_name);
+        if (location == -1) return;
+        glUniform3i(location, p_value.x, p_value.y, p_value.z);
+    }
+    
+    
+    void ShaderProgram::bind_uniform(const std::string &p_uniform_name, const glm::ivec4 &p_value) {
+        int32_t location = _get_uniform_location(p_uniform_name);
+        if (location == -1) return;
+        glUniform4i(location, p_value.x, p_value.y, p_value.z, p_value.w);
+    }
+    
+    
+    void ShaderProgram::bind_uniform(const std::string &p_uniform_name, const glm::mat2 &p_value) {
+        int32_t location = _get_uniform_location(p_uniform_name);
+        if (location == -1) return;
+        glUniformMatrix2fv(location, 1, GL_FALSE, &p_value[0][0]);
+    }
+    
+    
+    void ShaderProgram::bind_uniform(const std::string &p_uniform_name, const glm::mat3 &p_value) {
+        int32_t location = _get_uniform_location(p_uniform_name);
+        if (location == -1) return;
+        glUniformMatrix3fv(location, 1, GL_FALSE, &p_value[0][0]);
+    }
+    
+    
+    void ShaderProgram::bind_uniform(const std::string &p_uniform_name, const glm::mat4 &p_value) {
+        int32_t location = _get_uniform_location(p_uniform_name);
+        if (location == -1) return;
+        glUniformMatrix4fv(location, 1, GL_FALSE, &p_value[0][0]);
+    }
+
+
+    int32_t ShaderProgram::_get_uniform_location(const std::string &p_name) {
+        return glGetUniformLocation(program_id, p_name.c_str());
+    }
+
+
     void ShaderProgram::unbind() const {
         glUseProgram(0);
+    }
+
+
+    int ShaderProgram::get_uniform_count() {
+        return uniforms.size();
+    }
+    
+    
+    int ShaderProgram::get_uniform_index(const std::string &p_uniform_name) {
+        for (int i = 0; i < uniforms.size(); i++) {
+            if (uniforms[i].name == p_uniform_name) return i;
+        }
+        return -1;
+    }
+    
+    
+    const std::string &ShaderProgram::get_uniform_name(int index) {
+        ASSERT_FATAL_ERROR(index >= 0 && index < get_uniform_count(), "Error index out of bounds");
+        return uniforms[index].name;
+    }
+    
+    
+    ShaderDataType ShaderProgram::get_uniform_type(int index) {
+        ASSERT_FATAL_ERROR(index >= 0 && index < get_uniform_count(), "Error index out of bounds");
+        return uniforms[index].type;
     }
 
 
@@ -85,6 +197,26 @@ namespace lixy {
         // Free used shaders
         glDeleteShader(fragment_shader);
         glDeleteShader(vertex_shader);
+
+        // Get uniforms
+        int32_t uniform_count;
+        glGetProgramiv(program_id, GL_ACTIVE_UNIFORMS, &uniform_count);
+        uniforms.reserve(uniform_count);
+    
+        int32_t max_name_length;
+        glGetProgramiv(program_id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_name_length);
+        std::vector<GLchar> name(max_name_length);
+
+        for (int i = 0; i < uniform_count; i++) {
+            int32_t size;
+            uint32_t type;
+            glGetActiveUniform(program_id, i, max_name_length, nullptr, &size, &type, name.data());
+            
+            uniforms.push_back(Uniform{
+                .type = shader_data_type_from_gl_type(type),
+                .name = std::string(name.data())
+            });
+        }
 
         // Record possible errors
         if (creation_error) errors = error_stream.str();

@@ -1,5 +1,6 @@
 #include "material.hpp"
 #include "core/src/ref.hpp"
+#include "debug/debug.hpp"
 #include "renderer/src/primitives/shader.hpp"
 #include <fstream>
 #include <memory>
@@ -14,6 +15,29 @@ namespace lixy {
         fi.close();
 
         return string_buffer.str();
+    }
+
+
+    void Material::bind_material() const {
+        program->bind();
+
+        for (const auto &[name, uniform] : uniforms) {
+            switch (uniform.type) {
+            case ShaderDataType::Float: program->bind_uniform(name, *reinterpret_cast<const float*>(uniform.data));
+            case ShaderDataType::Vec2:  program->bind_uniform(name, *reinterpret_cast<const glm::vec2*>(uniform.data));
+            case ShaderDataType::Vec3:  program->bind_uniform(name, *reinterpret_cast<const glm::vec3*>(uniform.data));
+            case ShaderDataType::Vec4:  program->bind_uniform(name, *reinterpret_cast<const glm::vec4*>(uniform.data));
+            case ShaderDataType::Mat2:  program->bind_uniform(name, *reinterpret_cast<const glm::mat2*>(uniform.data));
+            case ShaderDataType::Mat3:  program->bind_uniform(name, *reinterpret_cast<const glm::mat3*>(uniform.data));
+            case ShaderDataType::Mat4:  program->bind_uniform(name, *reinterpret_cast<const glm::mat4*>(uniform.data));
+            case ShaderDataType::Int:   program->bind_uniform(name, *reinterpret_cast<const int*>(uniform.data));
+            case ShaderDataType::IVec2: program->bind_uniform(name, *reinterpret_cast<const glm::ivec2*>(uniform.data));
+            case ShaderDataType::IVec3: program->bind_uniform(name, *reinterpret_cast<const glm::ivec3*>(uniform.data));
+            case ShaderDataType::IVec4: program->bind_uniform(name, *reinterpret_cast<const glm::ivec4*>(uniform.data));
+            default:
+                ASSERT_FATAL_ERROR(true, "Unimplemented uniform type");
+            }
+        }
     }
 
 
@@ -39,5 +63,13 @@ namespace lixy {
 
     Material::Material(const std::string &p_vertex_source, const std::string &p_fragment_source) {
         program = std::make_unique<ShaderProgram>(p_vertex_source, p_fragment_source);
+
+        // Get uniforms
+        uniforms.reserve(program->get_uniform_count());
+        for (int i = 0; i < program->get_uniform_count(); i++) {
+            uniforms[program->get_uniform_name(i)] = Uniform{
+                .type = program->get_uniform_type(i)
+            };
+        }
     }
 }

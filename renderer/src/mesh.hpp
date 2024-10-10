@@ -1,9 +1,13 @@
 #pragma once
 
 #include "core/src/ref.hpp"
+
 #include "primitives/shader.hpp"
 #include "primitives/vbuffer.hpp"
+
 #include "thirdparty/flecs/flecs.h"
+#include "thirdparty/glm/glm.hpp"
+
 #include <memory>
 
 

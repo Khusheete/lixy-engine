@@ -2,9 +2,11 @@
 
 #include <memory>
 
-#include "renderer/src/shader.hpp"
-#include "renderer/src/vbuffer.hpp"
-#include <renderer/src/context.hpp>
+#include "renderer/src/primitives/shader.hpp"
+#include "renderer/src/primitives/vbuffer.hpp"
+#include "renderer/src/primitives/context.hpp"
+#include "renderer/src/renderer.hpp"
+#include "thirdparty/flecs/flecs.h"
 
 
 class DemoApplication {
@@ -12,13 +14,11 @@ public:
     void main_loop();
 
     DemoApplication();
+    virtual ~DemoApplication();
 
 private:
-    lixy::OpenGLContext context;
+    flecs::world world;
+    lixy::Renderer *renderer;
 
-    std::shared_ptr<lixy::Shader> shader;
-
-    std::shared_ptr<lixy::VertexBuffer> vertex_buffer;
-    std::shared_ptr<lixy::IndexBuffer> index_buffer;
-    std::shared_ptr<lixy::VertexArrayBuffer> vertex_array_buffer;
+    flecs::entity rectangle;
 };

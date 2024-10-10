@@ -4,7 +4,7 @@ project "Flecs"
     cppdialect "c++11"
     toolset "gcc"
     
-    files { "**.hpp", "**.cpp" }
+    files { "flecs.c", "flecs.h" }
     includedirs { "." }
 
     build_target_dir()
@@ -13,8 +13,6 @@ project "Flecs"
     build_include_dirs()
 
     build_target_dir()
-
-    defines { "FLECS_CPP" }
     
     filter "configurations:debug"
         defines { "NDEBUG" }

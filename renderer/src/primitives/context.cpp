@@ -18,6 +18,7 @@ namespace lixy {
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
         window = glfwCreateWindow(800, 600, "", nullptr, nullptr);
+        ASSERT_FATAL_ERROR(window, "Could not create window");
         glfwMakeContextCurrent(window);
 
         if (instance_count == 0) {
@@ -48,7 +49,30 @@ namespace lixy {
     }
 
 
+    OpenGLContext::OpenGLContext(OpenGLContext &&p_other)
+        : window(p_other.window)
+    {
+        p_other.window = nullptr;
+    }
+
+    OpenGLContext &OpenGLContext::operator=(OpenGLContext &&p_other) {
+        if (window != nullptr) {
+            glfwDestroyWindow(window);
+            instance_count -= 1;
+        }
+        
+        window = p_other.window;
+        p_other.window = nullptr;
+
+        return *this;
+    }
+
+
     OpenGLContext::~OpenGLContext() {
+        if (!window) return;
+
+        glfwDestroyWindow(window);
+
         instance_count -= 1;
         if (instance_count == 0) {
             glfwTerminate();

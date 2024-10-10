@@ -25,12 +25,13 @@ namespace lixy {
 
         OpenGLContext() = default;
         OpenGLContext(const OpenGLContext&) = delete;
-        OpenGLContext(OpenGLContext&&) = delete;
+        OpenGLContext(OpenGLContext &&p_other);
+        OpenGLContext &operator=(OpenGLContext &&p_other);
         virtual ~OpenGLContext();
 
     private:
         static int instance_count;
 
-        GLFWwindow *window;
+        GLFWwindow *window = nullptr;
     };
 }

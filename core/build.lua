@@ -1,11 +1,11 @@
-project "Demo"
-    kind "WindowedApp"
+project "Core"
+    kind "StaticLib"
     language "C++"
     cppdialect "c++17"
     toolset "gcc"
     
     files { "src/**.hpp", "src/**.cpp" }
-    links { "glfw", "GL", "GLEW", "pthread", "dl", "Flecs", "Core", "Renderer" }
+    -- links { "Flecs" }
 
     build_target_dir()
     build_object_dir()

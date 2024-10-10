@@ -3,43 +3,31 @@
 
 #include <asm-generic/errno-base.h>
 #include <sstream>
-#include <fstream>
 #include <vector>
 
 
 namespace lixy {
-
-    std::string _read_file(const std::string &file_path) {
-        std::fstream fi(file_path);
-        std::stringstream string_buffer;
-        string_buffer << fi.rdbuf();
-        fi.close();
-
-        return string_buffer.str();
-    }
-
-
-    void Shader::bind() {
+    void ShaderProgram::bind() const {
         glUseProgram(program_id);
     }
 
 
-    void Shader::unbind() {
+    void ShaderProgram::unbind() const {
         glUseProgram(0);
     }
 
 
-    bool Shader::is_valid() {
+    bool ShaderProgram::is_valid() const {
         return !creation_error;
     }
 
 
-    const std::string &Shader::get_errors() {
+    const std::string &ShaderProgram::get_errors() const {
         return errors;
     }
 
 
-    Shader::Shader(const std::string &p_vertex_source, const std::string &p_fragment_source) {
+    ShaderProgram::ShaderProgram(const std::string &p_vertex_source, const std::string &p_fragment_source) {
         std::stringstream error_stream;
 
         // Compile vertex shader
@@ -103,7 +91,7 @@ namespace lixy {
     }
 
 
-    Shader::Shader(Shader &&p_other)
+    ShaderProgram::ShaderProgram(ShaderProgram &&p_other)
         : program_id(p_other.program_id),
         creation_error(p_other.creation_error),
         errors(std::move(p_other.errors))
@@ -112,13 +100,25 @@ namespace lixy {
     }
 
 
-    Shader::~Shader() {
+    ShaderProgram &ShaderProgram::operator=(ShaderProgram &&p_other) {
+        if (program_id != 0) {
+            glDeleteProgram(program_id);
+        }
+
+        program_id = p_other.program_id;
+        p_other.program_id = 0;
+        
+        return *this;
+    }
+
+
+    ShaderProgram::~ShaderProgram() {
         if (program_id == 0) return;
         glDeleteProgram(program_id);
     }
 
 
-    Shader Shader::load_shader_program(const std::string &p_vertex_path, const std::string &p_index_path) {
-        return Shader(_read_file(p_vertex_path), _read_file(p_index_path));
-    }
+    // ShaderProgram ShaderProgram::load_shader_program(const std::string &p_vertex_path, const std::string &p_fragment_path) {
+    //     return ShaderProgram(_read_file(p_vertex_path), _read_file(p_fragment_path));
+    // }
 }

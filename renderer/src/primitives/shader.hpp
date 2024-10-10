@@ -85,20 +85,21 @@ namespace lixy {
     }
     
     
-    class Shader {
+    class ShaderProgram {
     public:
-        void bind();
-        void unbind();
+        void bind() const;
+        void unbind() const;
     
-        bool is_valid();
-        const std::string &get_errors();
+        bool is_valid() const;
+        const std::string &get_errors() const;
     
-        static Shader load_shader_program(const std::string &p_vertex_path, const std::string &p_index_path);
+        // static ShaderProgram load_shader_program(const std::string &p_vertex_path, const std::string &p_fragment_path);
     
-        Shader(const std::string &p_vertex_source, const std::string &p_fragment_source);
-        Shader(const Shader&) = delete;
-        Shader(Shader &&p_other);
-        virtual ~Shader();
+        ShaderProgram(const std::string &p_vertex_source, const std::string &p_fragment_source);
+        ShaderProgram(const ShaderProgram&) = delete;
+        ShaderProgram(ShaderProgram &&p_other);
+        ShaderProgram &operator=(ShaderProgram &&p_other);
+        virtual ~ShaderProgram();
     
     private:
         uint32_t program_id;

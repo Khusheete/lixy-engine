@@ -1,8 +1,13 @@
 #include "application.hpp"
 
+#include "core/src/module.hpp"
+#include "core/src/ref.hpp"
 #include "debug/debug.hpp"
-#include "renderer/src/shader.hpp"
-#include "renderer/src/vbuffer.hpp"
+#include "renderer/src/material.hpp"
+#include "renderer/src/mesh.hpp"
+#include "renderer/src/module.hpp"
+#include "renderer/src/renderer.hpp"
+
 #include <GL/gl.h>
 #include <array>
 #include <cstdlib>
@@ -10,56 +15,47 @@
 
 
 void DemoApplication::main_loop() {
-    while (!context.window_should_close()) {
-        glfwPollEvents();
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        shader->bind();
-        vertex_array_buffer->bind();
-
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-
-        vertex_array_buffer->unbind();
-        shader->unbind();
-
-        context.swap_buffers();
+    while (!lixy::Renderer::get_singleton(world)->window_should_close()) {
+        world.progress();
     }
 }
 
 
 DemoApplication::DemoApplication() {
-    context.initialize();
-    context.window_set_title("Demo OpenGL Application");
+    world.import<lixy::CoreModule>();
+    world.import<lixy::RendererModule>();
+
+    lixy::Renderer::get_singleton(world)->window_set_title("Demo OpenGL Application");
+
+    // Create material
+    lixy::EntityRef material = lixy::Material::load(world, "assets/shaders/shader.vert", "assets/shaders/shader.frag");
+    ASSERT_FATAL_ERROR(
+        material.get<lixy::Material>()->is_valid(),
+        "Failed to load shaders" << material.get<lixy::Material>()->get_errors()
+    );
 
     // Create mesh
-    std::array<float, 8> vertices = {
-        -0.5f, -0.5f,
-         0.5f, -0.5f,
-        -0.5f,  0.5f,
-         0.5f,  0.5f,
+    std::vector<lixy::Vertex> vertices = {
+        {{-0.5f, -0.5f, 0.0f}},
+        {{ 0.5f, -0.5f, 0.0f}},
+        {{-0.5f,  0.5f, 0.0f}},
+        {{ 0.5f,  0.5f, 0.0f}},
     };
 
-    std::array<lixy::ShaderDataType, 1> layout = {
-        lixy::ShaderDataType::Vec2
-    };
-
-    std::array<uint32_t, 6> indices {
+    std::vector<uint32_t> indices {
         0, 1, 2, 2, 3, 1
     };
 
-    vertex_buffer = std::make_shared<lixy::VertexBuffer>(vertices.data(), vertices.size() * sizeof(float));
-    index_buffer = std::make_shared<lixy::IndexBuffer>(indices.data(), indices.size());
-    vertex_array_buffer = std::make_shared<lixy::VertexArrayBuffer>(
-        vertex_buffer,
-        index_buffer,
-        layout.data(),
-        layout.size()
-    );
+    lixy::EntityRef mesh = lixy::ArrayMesh::create(world);
+    mesh.get_mut<lixy::ArrayMesh>()->add_surface(vertices, indices, material);
 
-    // Create shader
-    shader = std::make_shared<lixy::Shader>(
-        lixy::Shader::load_shader_program("assets/shaders/shader.vert", "assets/shaders/shader.frag")
-    );
-    ASSERT_FATAL_ERROR(shader->is_valid(), shader->get_errors());
+    // Rectangle
+    rectangle = world.entity()
+        .set<lixy::ArrayMeshInstance>({mesh})
+        .add<lixy::Visible>();
+}
+
+
+DemoApplication::~DemoApplication() {
+    rectangle.destruct();
 }

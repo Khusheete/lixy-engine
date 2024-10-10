@@ -2,7 +2,7 @@
 
 #include "debug/debug.hpp"
 #include "shader.hpp"
-#include <glm/glm.hpp>
+#include "thirdparty/glm/fwd.hpp"
 #include <GL/glew.h>
 
 #include <cstdint>

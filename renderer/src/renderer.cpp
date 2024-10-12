@@ -29,6 +29,7 @@ namespace lixy {
         p_world.system("Start Frame")
             .kind(flecs::PreUpdate)
             .run([&](flecs::iter&) {
+                context.set_current();
                 glfwPollEvents();
 
                 glClearColor(0.1f, 0.1f, 0.1f, 1.0f);

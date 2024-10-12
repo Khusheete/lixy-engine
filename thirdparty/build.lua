@@ -1,5 +1,5 @@
 libraries = {
-    "flecs"
+    "flecs", "stb"
 }
 
 for i, lib in ipairs(libraries) do

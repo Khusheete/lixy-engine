@@ -38,6 +38,7 @@ namespace lixy {
             attributes[i].offset = current_offset;
             current_offset += shader_data_type_get_size(p_layout[i]);
         }
+        stride = current_offset;
     }
 
 

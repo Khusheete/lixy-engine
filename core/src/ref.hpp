@@ -58,7 +58,7 @@ namespace lixy {
         EntityRef(flecs::entity p_entity);
 
     private:
-        flecs::entity reference;
+        flecs::entity reference = flecs::entity::null();
     };
 
 

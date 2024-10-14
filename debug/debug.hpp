@@ -7,7 +7,7 @@
 
 
 #define BOLD "\e[1m"
-#define YELLOW "\e[38;2;180;180;20"
+#define YELLOW "\e[38;2;180;180;20m"
 #define RED "\e[38;2;220;50;50m"
 #define CLEAR "\e[0m"
 

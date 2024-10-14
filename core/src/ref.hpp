@@ -22,6 +22,11 @@ namespace lixy {
         }
 
         template<typename Component>
+        bool has() const {
+            return reference.has<Component>();
+        }
+
+        template<typename Component>
         EntityRef &set(const Component &p_component) {
             reference.set<Component>(p_component);
             return *this;

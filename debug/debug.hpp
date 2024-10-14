@@ -12,10 +12,14 @@
 #define CLEAR "\e[0m"
 
 
+#define LOG_WARNING(warning) std::cerr << YELLOW << BOLD << "[WARNING] " << CLEAR << YELLOW << warning << CLEAR << std::endl
+#define LOG_ERROR(error) std::cerr << RED << BOLD << "[ERROR] " << CLEAR << RED << error << CLEAR << std::endl
+
+
 #define ASSERT_FATAL_ERROR(predicate, error_str)                        \
 if (!(predicate)) {                                                     \
     std::stringstream error;                                            \
     error << "Assertion `" << #predicate << "` failed: " << error_str;  \
-    std::cerr << RED << error.str() << CLEAR << std::endl;              \
+    LOG_ERROR(error.str());                                             \
     throw std::runtime_error(error.str());                              \
 }

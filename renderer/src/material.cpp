@@ -2,6 +2,7 @@
 #include "core/src/ref.hpp"
 #include "debug/debug.hpp"
 #include "renderer/src/primitives/shader.hpp"
+#include "renderer/src/texture.hpp"
 #include <fstream>
 #include <memory>
 
@@ -38,6 +39,30 @@ namespace lixy {
                 LOG_WARNING("Unimplemented uniform type");
             }
         }
+
+        int texture_location = 0;
+        for (const auto &[name, uniform] : resource_uniform) {
+            switch (uniform.type) {
+            case opengl::ShaderDataType::Sampler2D:
+            {
+                if (!uniform.resource.has<Texture>()) continue;
+                uniform.resource.get<Texture>()->bind(texture_location);
+                program->bind_uniform(name, texture_location);
+                texture_location += 1;
+                break;
+            }
+            default:
+                LOG_WARNING("Unimplemented uniform type");
+            }
+        }
+    }
+
+
+    template<>
+    void Material::set_uniform<EntityRef>(const std::string &p_uniform_name, const EntityRef &p_value) {
+        try {
+            resource_uniform.at(p_uniform_name).resource = p_value;
+        } catch (std::out_of_range) {}
     }
 
 
@@ -62,14 +87,38 @@ namespace lixy {
 
 
     Material::Material(const std::string &p_vertex_source, const std::string &p_fragment_source) {
-        program = std::make_unique<ShaderProgram>(p_vertex_source, p_fragment_source);
+        program = std::make_unique<opengl::ShaderProgram>(p_vertex_source, p_fragment_source);
 
         // Get uniforms
         uniforms.reserve(program->get_uniform_count());
         for (int i = 0; i < program->get_uniform_count(); i++) {
-            uniforms[program->get_uniform_name(i)] = Uniform{
-                .type = program->get_uniform_type(i)
-            };
+            opengl::ShaderDataType type = program->get_uniform_type(i);
+            switch (type) {
+            case opengl::ShaderDataType::Float:
+            case opengl::ShaderDataType::Vec2:
+            case opengl::ShaderDataType::Vec3:
+            case opengl::ShaderDataType::Vec4:
+            case opengl::ShaderDataType::Mat2:
+            case opengl::ShaderDataType::Mat3:
+            case opengl::ShaderDataType::Mat4:
+            case opengl::ShaderDataType::Int:
+            case opengl::ShaderDataType::IVec2:
+            case opengl::ShaderDataType::IVec3:
+            case opengl::ShaderDataType::IVec4:
+            case opengl::ShaderDataType::Bool:
+                uniforms[program->get_uniform_name(i)] = Uniform{
+                    .type = type
+                };
+                break;
+            case opengl::ShaderDataType::Sampler2D:
+                resource_uniform[program->get_uniform_name(i)] = ResourceUniform{
+                    .type = type
+                };
+                break;
+            case opengl::ShaderDataType::Unknown:
+                LOG_WARNING("Unknown uniform type named: `" << program->get_uniform_name(i) << "` in shader");
+            }
+            
         }
     }
 }

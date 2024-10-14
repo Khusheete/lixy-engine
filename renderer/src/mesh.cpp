@@ -12,7 +12,7 @@ namespace lixy {
 
     const opengl::BufferLayout &Vertex::get_layout() {
         static const std::array<opengl::ShaderDataType, 2> layer_list = {
-            opengl::ShaderDataType::Vec3
+            opengl::ShaderDataType::Vec3, opengl::ShaderDataType::Vec2
         };
         static const opengl::BufferLayout buffer_layout(layer_list.data(), layer_list.size());
         return buffer_layout;

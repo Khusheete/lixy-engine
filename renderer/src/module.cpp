@@ -5,6 +5,7 @@
 #include "renderer/src/mesh.hpp"
 #include "renderer/src/renderer.hpp"
 
+#include "renderer/src/texture.hpp"
 #include "thirdparty/flecs/flecs.h"
 
 
@@ -17,6 +18,7 @@ namespace lixy {
         // Add components
         p_world.add<ArrayMesh>();
         p_world.add<Material>();
+        p_world.add<Texture>();
         p_world.add<ArrayMeshInstance>();
         p_world.add<Visible>();
 

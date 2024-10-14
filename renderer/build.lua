@@ -5,7 +5,6 @@ project "Renderer"
     toolset "gcc"
     
     files { "src/**.hpp", "src/**.cpp" }
-    -- links { "glfw", "GL", "GLEW", "glm", "pthread", "dl" }
 
     build_target_dir()
     build_object_dir()

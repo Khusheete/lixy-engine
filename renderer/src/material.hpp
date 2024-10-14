@@ -45,8 +45,14 @@ namespace lixy {
             uint32_t data[16];
         };
 
+        struct ResourceUniform {
+            opengl::ShaderDataType type;
+            EntityRef resource;
+        };
+
     private:
         std::unique_ptr<opengl::ShaderProgram> program;
         std::unordered_map<std::string, Uniform> uniforms;
+        std::unordered_map<std::string, ResourceUniform> resource_uniform; // Resources need to be implemented apart from other uniforms as they require cleanup
     };
 }

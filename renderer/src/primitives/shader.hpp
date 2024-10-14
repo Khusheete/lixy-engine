@@ -13,7 +13,8 @@
 namespace lixy::opengl {
 
     enum class ShaderDataType {
-        Unknown = 0, Float, Vec2, Vec3, Vec4, Mat2, Mat3, Mat4, Int, IVec2, IVec3, IVec4, Bool
+        Unknown = 0, Float, Vec2, Vec3, Vec4, Mat2, Mat3, Mat4, Int, IVec2, IVec3, IVec4, Bool,
+        Sampler2D
     };
     
 
@@ -41,6 +42,8 @@ namespace lixy::opengl {
             return ShaderDataType::IVec4;
         case GL_BOOL:
             return ShaderDataType::Bool;
+        case GL_SAMPLER_2D:
+            return ShaderDataType::Sampler2D;
         default:
             return ShaderDataType::Unknown;
         }
@@ -56,6 +59,7 @@ namespace lixy::opengl {
         case ShaderDataType::Mat2: return 2 * 2 * 4;
         case ShaderDataType::Mat3: return 3 * 3 * 4;
         case ShaderDataType::Mat4: return 4 * 4 * 4;
+        case ShaderDataType::Sampler2D:
         case ShaderDataType::Int: return 4;
         case ShaderDataType::IVec2: return 2 * 4;
         case ShaderDataType::IVec3: return 3 * 4;
@@ -85,6 +89,8 @@ namespace lixy::opengl {
             return GL_INT;
         case ShaderDataType::Bool:
             return GL_BOOL;
+        case ShaderDataType::Sampler2D:
+            return GL_SAMPLER_2D;
         default:
             ASSERT_FATAL_ERROR(false, "Unknown ShaderDataType");
             return 0;
@@ -96,6 +102,7 @@ namespace lixy::opengl {
         switch (p_type) {
         case ShaderDataType::Float:
         case ShaderDataType::Int:
+        case ShaderDataType::Sampler2D:
         case ShaderDataType::Bool:
             return 1;
         case ShaderDataType::Vec2:

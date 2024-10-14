@@ -5,7 +5,7 @@ project "Demo"
     toolset "gcc"
     
     files { "src/**.hpp", "src/**.cpp" }
-    links { "glfw", "GL", "GLEW", "pthread", "dl", "Flecs", "Core", "Renderer" }
+    links { "glfw", "GL", "GLEW", "pthread", "dl", "Flecs", "Core", "Renderer", "Stb" }
 
     build_target_dir()
     build_object_dir()

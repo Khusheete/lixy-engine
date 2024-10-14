@@ -7,6 +7,7 @@
 #include "renderer/src/mesh.hpp"
 #include "renderer/src/module.hpp"
 #include "renderer/src/renderer.hpp"
+#include "renderer/src/texture.hpp"
 #include "thirdparty/glm/fwd.hpp"
 
 #include <GL/gl.h>
@@ -28,6 +29,10 @@ DemoApplication::DemoApplication() {
 
     lixy::Renderer::get_singleton(world)->window_set_title("Demo OpenGL Application");
 
+    // Load image
+    lixy::EntityRef texture = lixy::Texture::load_texture2d(world, "assets/textures/test.png");
+    ASSERT_FATAL_ERROR(texture.get<lixy::Texture>()->is_valid(), "Image not valid");
+
     // Create material
     lixy::EntityRef material = lixy::Material::load(world, "assets/shaders/shader.vert", "assets/shaders/shader.frag");
     lixy::Material *material_component = material.get_mut<lixy::Material>();
@@ -36,14 +41,15 @@ DemoApplication::DemoApplication() {
         "Failed to load shaders" << material_component->get_errors()
     );
     material_component->set_uniform("u_color", glm::vec3(1.0, 0.0, 1.0));
+    material_component->set_uniform("u_texture", texture);
 
 
     // Create mesh
     std::vector<lixy::Vertex> vertices = {
-        {{-0.5f, -0.5f, 0.0f}},
-        {{ 0.5f, -0.5f, 0.0f}},
-        {{-0.5f,  0.5f, 0.0f}},
-        {{ 0.5f,  0.5f, 0.0f}},
+        {{-0.5f, -0.5f, 0.0f}, {0.0, 0.0}},
+        {{ 0.5f, -0.5f, 0.0f}, {1.0, 0.0}},
+        {{-0.5f,  0.5f, 0.0f}, {0.0, 1.0}},
+        {{ 0.5f,  0.5f, 0.0f}, {1.0, 1.0}},
     };
 
     std::vector<uint32_t> indices {

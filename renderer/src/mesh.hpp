@@ -15,6 +15,7 @@ namespace lixy {
 
     struct Vertex {
         glm::vec3 vertex_pos;
+        glm::vec2 uv;
 
         static const opengl::BufferLayout &get_layout();
     };

@@ -1,10 +1,13 @@
 #version 420 core
 
-layout(location = 0) in vec3 color;
+layout(location = 0) in vec2 uv;
 
-out vec4 out_color;
+layout(location = 0) out vec4 out_color;
+
+
+uniform sampler2D u_texture;
 
 
 void main() {
-    out_color = vec4(color, 1.0);
+    out_color = texture(u_texture, uv);
 }

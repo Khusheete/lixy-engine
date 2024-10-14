@@ -21,6 +21,9 @@ namespace lixy::opengl {
         ASSERT_FATAL_ERROR(window, "Could not create window");
         glfwMakeContextCurrent(window);
 
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
+
         if (instance_count == 0) {
             ASSERT_FATAL_ERROR(glewInit() == GLEW_OK, "Could not initialize glew");
         }

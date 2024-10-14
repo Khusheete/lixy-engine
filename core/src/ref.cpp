@@ -23,6 +23,17 @@ namespace lixy {
     }
 
 
+    EntityRef &EntityRef::operator=(const EntityRef &p_other) {
+        if (reference.is_alive()) {
+            reference.get_mut<RefCounted>()->reference_count -= 1;
+        }
+
+        reference = p_other.reference;
+        reference.get_mut<RefCounted>()->reference_count += 1;
+        return *this;
+    }
+
+
     EntityRef::EntityRef(EntityRef &&p_other)
         : reference(p_other.reference)
     {

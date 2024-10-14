@@ -11,25 +11,37 @@ namespace lixy {
     public:
         inline flecs::entity get_entity() { return reference; };
 
-        template<class Component>
+        template<typename Component>
         const Component *get() const {
             return reference.get<Component>();
         }
 
-        template<class Component>
+        template<typename Component>
         Component *get_mut() {
             return reference.get_mut<Component>();
         }
 
-        template<class Component>
+        template<typename Component>
+        EntityRef &set(const Component &p_component) {
+            reference.set<Component>(p_component);
+            return *this;
+        }
+
+        template<typename Component>
         EntityRef &add() {
             reference.add<Component>();
             return *this;
         }
 
+        template<typename Component>
+        EntityRef &remove() {
+            reference.remove<Component>();
+            return *this;
+        }
+
         template<class Component, class ...Args>
-        EntityRef &emplace(Args &&...args) {
-            reference.emplace<Component>(std::forward<Args>(args)...);
+        EntityRef &emplace(Args &&...p_args) {
+            reference.emplace<Component>(std::forward<Args>(p_args)...);
             return *this;
         }
 
@@ -37,6 +49,7 @@ namespace lixy {
 
         EntityRef() = default;
         EntityRef(const EntityRef &p_other);
+        EntityRef &operator=(const EntityRef &p_other);
         EntityRef(EntityRef &&p_other);
         EntityRef &operator=(EntityRef &&p_other);
         virtual ~EntityRef();

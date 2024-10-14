@@ -16,7 +16,7 @@ namespace lixy {
     struct Vertex {
         glm::vec3 vertex_pos;
 
-        static const BufferLayout &get_layout();
+        static const opengl::BufferLayout &get_layout();
     };
 
 
@@ -34,9 +34,9 @@ namespace lixy {
 
     private:
         struct Surface {
-            std::shared_ptr<VertexBuffer> vertex_buffer;
-            std::shared_ptr<IndexBuffer> index_buffer;
-            VertexArrayBuffer vertex_array;
+            std::shared_ptr<opengl::VertexBuffer> vertex_buffer;
+            std::shared_ptr<opengl::IndexBuffer> index_buffer;
+            opengl::VertexArrayBuffer vertex_array;
             uint32_t index_count;
 
             EntityRef material;

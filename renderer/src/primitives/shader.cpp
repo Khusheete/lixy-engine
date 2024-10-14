@@ -11,7 +11,7 @@
 
 
 
-namespace lixy {
+namespace lixy::opengl {
     void ShaderProgram::bind() const {
         glUseProgram(program_id);
     }

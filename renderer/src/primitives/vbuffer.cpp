@@ -6,7 +6,7 @@
 #include <GL/glew.h>
 
 
-namespace lixy {
+namespace lixy::opengl {
 
     uint32_t BufferLayout::get_attribute_offset(uint32_t index) const {
         return attributes[index].offset;

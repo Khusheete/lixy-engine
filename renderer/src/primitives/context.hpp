@@ -9,7 +9,7 @@
 #include <GLFW/glfw3.h>
 
 
-namespace lixy {
+namespace lixy::opengl {
 
     class OpenGLContext {
     public:

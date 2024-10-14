@@ -41,12 +41,12 @@ namespace lixy {
     
     private:
         struct Uniform {
-            ShaderDataType type;
+            opengl::ShaderDataType type;
             uint32_t data[16];
         };
 
     private:
-        std::unique_ptr<ShaderProgram> program;
+        std::unique_ptr<opengl::ShaderProgram> program;
         std::unordered_map<std::string, Uniform> uniforms;
     };
 }

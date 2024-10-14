@@ -10,11 +10,11 @@
 
 namespace lixy {
 
-    const BufferLayout &Vertex::get_layout() {
-        static const std::array<ShaderDataType, 1> layer_list = {
-            ShaderDataType::Vec3
+    const opengl::BufferLayout &Vertex::get_layout() {
+        static const std::array<opengl::ShaderDataType, 2> layer_list = {
+            opengl::ShaderDataType::Vec3
         };
-        static const BufferLayout buffer_layout(layer_list.data(), layer_list.size());
+        static const opengl::BufferLayout buffer_layout(layer_list.data(), layer_list.size());
         return buffer_layout;
     }
 
@@ -29,9 +29,9 @@ namespace lixy {
 
 
     void ArrayMesh::add_surface(const std::vector<Vertex> &p_vertices, const std::vector<uint32_t> &p_indices, const EntityRef &p_material) {
-        std::shared_ptr<VertexBuffer> vertex_buffer = std::make_shared<VertexBuffer>(p_vertices.data(), p_vertices.size() * sizeof(Vertex));
-        std::shared_ptr<IndexBuffer> index_buffer = std::make_shared<IndexBuffer>(p_indices.data(), p_indices.size());
-        VertexArrayBuffer vertex_array(vertex_buffer, index_buffer, Vertex::get_layout());
+        std::shared_ptr<opengl::VertexBuffer> vertex_buffer = std::make_shared<opengl::VertexBuffer>(p_vertices.data(), p_vertices.size() * sizeof(Vertex));
+        std::shared_ptr<opengl::IndexBuffer> index_buffer = std::make_shared<opengl::IndexBuffer>(p_indices.data(), p_indices.size());
+        opengl::VertexArrayBuffer vertex_array(vertex_buffer, index_buffer, Vertex::get_layout());
 
         surfaces.push_back(Surface{
             vertex_buffer,

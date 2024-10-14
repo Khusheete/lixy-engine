@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 
 
-namespace lixy {
+namespace lixy::opengl {
     int OpenGLContext::instance_count = 0;
 
 

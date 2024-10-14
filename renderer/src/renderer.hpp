@@ -33,6 +33,6 @@ namespace lixy {
         friend RendererModule;
     
     private:
-        OpenGLContext context;
+        opengl::OpenGLContext context;
     };
 }

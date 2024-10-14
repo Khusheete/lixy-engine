@@ -23,19 +23,19 @@ namespace lixy {
 
         for (const auto &[name, uniform] : uniforms) {
             switch (uniform.type) {
-            case ShaderDataType::Float: program->bind_uniform(name, *reinterpret_cast<const float*>(uniform.data));
-            case ShaderDataType::Vec2:  program->bind_uniform(name, *reinterpret_cast<const glm::vec2*>(uniform.data));
-            case ShaderDataType::Vec3:  program->bind_uniform(name, *reinterpret_cast<const glm::vec3*>(uniform.data));
-            case ShaderDataType::Vec4:  program->bind_uniform(name, *reinterpret_cast<const glm::vec4*>(uniform.data));
-            case ShaderDataType::Mat2:  program->bind_uniform(name, *reinterpret_cast<const glm::mat2*>(uniform.data));
-            case ShaderDataType::Mat3:  program->bind_uniform(name, *reinterpret_cast<const glm::mat3*>(uniform.data));
-            case ShaderDataType::Mat4:  program->bind_uniform(name, *reinterpret_cast<const glm::mat4*>(uniform.data));
-            case ShaderDataType::Int:   program->bind_uniform(name, *reinterpret_cast<const int*>(uniform.data));
-            case ShaderDataType::IVec2: program->bind_uniform(name, *reinterpret_cast<const glm::ivec2*>(uniform.data));
-            case ShaderDataType::IVec3: program->bind_uniform(name, *reinterpret_cast<const glm::ivec3*>(uniform.data));
-            case ShaderDataType::IVec4: program->bind_uniform(name, *reinterpret_cast<const glm::ivec4*>(uniform.data));
+            case opengl::ShaderDataType::Float: program->bind_uniform(name, *reinterpret_cast<const float*>(uniform.data));
+            case opengl::ShaderDataType::Vec2:  program->bind_uniform(name, *reinterpret_cast<const glm::vec2*>(uniform.data));
+            case opengl::ShaderDataType::Vec3:  program->bind_uniform(name, *reinterpret_cast<const glm::vec3*>(uniform.data));
+            case opengl::ShaderDataType::Vec4:  program->bind_uniform(name, *reinterpret_cast<const glm::vec4*>(uniform.data));
+            case opengl::ShaderDataType::Mat2:  program->bind_uniform(name, *reinterpret_cast<const glm::mat2*>(uniform.data));
+            case opengl::ShaderDataType::Mat3:  program->bind_uniform(name, *reinterpret_cast<const glm::mat3*>(uniform.data));
+            case opengl::ShaderDataType::Mat4:  program->bind_uniform(name, *reinterpret_cast<const glm::mat4*>(uniform.data));
+            case opengl::ShaderDataType::Int:   program->bind_uniform(name, *reinterpret_cast<const int*>(uniform.data));
+            case opengl::ShaderDataType::IVec2: program->bind_uniform(name, *reinterpret_cast<const glm::ivec2*>(uniform.data));
+            case opengl::ShaderDataType::IVec3: program->bind_uniform(name, *reinterpret_cast<const glm::ivec3*>(uniform.data));
+            case opengl::ShaderDataType::IVec4: program->bind_uniform(name, *reinterpret_cast<const glm::ivec4*>(uniform.data));
             default:
-                ASSERT_FATAL_ERROR(true, "Unimplemented uniform type");
+                LOG_WARNING("Unimplemented uniform type");
             }
         }
     }

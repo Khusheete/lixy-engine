@@ -10,7 +10,7 @@
 #include <vector>
 
 
-namespace lixy {
+namespace lixy::opengl {
 
     enum class ShaderDataType {
         Unknown = 0, Float, Vec2, Vec3, Vec4, Mat2, Mat3, Mat4, Int, IVec2, IVec3, IVec4, Bool

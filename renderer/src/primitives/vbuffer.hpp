@@ -10,7 +10,7 @@
 #include <memory>
 
 
-namespace lixy {
+namespace lixy::opengl {
 
     class BufferLayout {
     public:

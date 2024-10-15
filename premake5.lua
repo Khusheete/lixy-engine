@@ -1,9 +1,40 @@
 require "ecc/ecc"
 
+local syshost = "unknown"
+local ver = os.getversion()
+local hosttype = ver.description
+
+if hosttype:sub(1,5) == "Linux" then
+    syshost = "Linux"
+elseif hosttype:sub(1,8) == "Mac OS X" then
+    syshost = "MacOSX"
+elseif hosttype:sub(1,7) == "Windows" then
+    syshost = "Nt"
+else
+    syshost = hosttype
+end
+
 workspace "opengl-toy-renderer"
     configurations { "debug", "release" }
     platforms { "linux", "windows" }
 
+
+function platform_config()
+    filter "platforms:linux"
+        system "linux"
+        toolset "gcc"
+    
+    filter "platforms:windows"
+        system "windows"
+        if syshost == "Linux" then
+            gccprefix "x86_64-w64-mingw32-"
+            toolset "gcc"
+        elseif syshost == "Nt" then
+            toolset "msc"
+        end
+    
+    filter ""
+end
 
 function build_target_dir()
     targetdir "%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}"

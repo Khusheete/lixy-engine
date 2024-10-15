@@ -2,7 +2,6 @@ project "Flecs"
     kind "StaticLib"
     language "C++"
     cppdialect "c++11"
-    toolset "gcc"
     
     files { "flecs.c", "flecs.h" }
     includedirs { "." }
@@ -13,6 +12,14 @@ project "Flecs"
     build_include_dirs()
 
     build_target_dir()
+
+    platform_config()
+
+    filter "platforms:windows"
+        defines { "ECS_TARGET_WINDOWS" }
+    
+    filter "platforms:linux"
+        defines { "ECS_TARGET_LINUX" }
     
     filter "configurations:debug"
         defines { "NDEBUG" }

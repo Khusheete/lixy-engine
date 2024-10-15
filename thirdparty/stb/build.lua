@@ -1,7 +1,6 @@
 project "Stb"
     kind "StaticLib"
     language "C"
-    toolset "gcc"
     
     files { "implementation.c", "**.h" }
     includedirs { "." }
@@ -12,6 +11,8 @@ project "Stb"
     build_include_dirs()
 
     build_target_dir()
+
+    platform_config()
     
     filter "configurations:debug"
         defines { "NDEBUG" }

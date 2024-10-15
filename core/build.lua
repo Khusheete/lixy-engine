@@ -2,7 +2,6 @@ project "Core"
     kind "StaticLib"
     language "C++"
     cppdialect "c++17"
-    toolset "gcc"
     
     files { "src/**.hpp", "src/**.cpp" }
     -- links { "Flecs" }
@@ -14,6 +13,7 @@ project "Core"
 
     build_target_dir()
 
+    platform_config()
     
     filter "configurations:debug"
         defines { "NDEBUG" }

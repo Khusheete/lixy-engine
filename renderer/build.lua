@@ -2,7 +2,6 @@ project "Renderer"
     kind "StaticLib"
     language "C++"
     cppdialect "c++17"
-    toolset "gcc"
     
     files { "src/**.hpp", "src/**.cpp" }
 

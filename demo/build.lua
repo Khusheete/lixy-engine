@@ -2,7 +2,6 @@ project "Demo"
     kind "WindowedApp"
     language "C++"
     cppdialect "c++17"
-    toolset "gcc"
     
     files { "src/**.hpp", "src/**.cpp" }
     links { "glfw", "GL", "GLEW", "pthread", "dl", "Flecs", "Core", "Renderer", "Stb" }
@@ -14,6 +13,7 @@ project "Demo"
 
     build_target_dir()
 
+    platform_config()
     
     filter "configurations:debug"
         defines { "NDEBUG" }

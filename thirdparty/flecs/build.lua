@@ -14,12 +14,6 @@ project "Flecs"
     build_target_dir()
 
     platform_config()
-
-    filter "platforms:windows"
-        defines { "ECS_TARGET_WINDOWS" }
-    
-    filter "platforms:linux"
-        defines { "ECS_TARGET_LINUX" }
     
     filter "configurations:debug"
         defines { "NDEBUG" }

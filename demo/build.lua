@@ -4,7 +4,7 @@ project "Demo"
     cppdialect "c++17"
     
     files { "src/**.hpp", "src/**.cpp" }
-    links { "glfw", "GL", "GLEW", "pthread", "dl", "Flecs", "Core", "Renderer", "Stb" }
+    links { "Renderer", "Flecs", "Stb", "Core", "glfw", "GL", "GLEW", "pthread", "dl" }
 
     build_target_dir()
     build_object_dir()

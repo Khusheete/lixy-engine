@@ -93,10 +93,11 @@ namespace lixy {
                 }
             });
 
-        p_world.system<const Renderer, const ArrayMeshInstance, Transform, const Visible>("Draw ArrayMeshInstances")
+        p_world.system<const Renderer, const ArrayMeshInstance, Transform>("Draw ArrayMeshInstances")
             .term_at(0).singleton()
+            .with<Visible>()
             .kind(flecs::PreStore)
-            .each([](const Renderer &rd, const ArrayMeshInstance &p_instance, Transform &p_transform, const Visible&) {
+            .each([](const Renderer &rd, const ArrayMeshInstance &p_instance, Transform &p_transform) {
                 const ArrayMesh *mesh = p_instance.array_mesh.get<ArrayMesh>();
                 mesh->record_draw(rd.projection_matrix, rd.view_matrix, p_transform.get_matrix());
             });

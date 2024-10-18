@@ -13,12 +13,4 @@ project "Flecs"
 
     build_target_dir()
 
-    platform_config()
-    
-    filter "configurations:debug"
-        defines { "NDEBUG" }
-        symbols "On"
-    
-    filter "configurations:release"
-        defines { "NDEBUG" }
-        optimize "On"
+    build_config()

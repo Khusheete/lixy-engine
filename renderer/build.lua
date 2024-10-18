@@ -12,11 +12,4 @@ project "Renderer"
 
     build_target_dir()
 
-    
-    filter "configurations:debug"
-        defines { "NDEBUG" }
-        symbols "On"
-    
-    filter "configurations:release"
-        defines { "NDEBUG" }
-        optimize "On"
+    build_config()

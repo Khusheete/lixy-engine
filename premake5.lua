@@ -15,11 +15,11 @@ else
 end
 
 workspace "opengl-toy-renderer"
-    configurations { "debug", "release" }
+    configurations { "debug", "release-debug", "release" }
     platforms { "linux", "windows" }
 
 
-function platform_config()
+function build_config()
     filter "platforms:linux"
         system "linux"
         toolset "gcc"
@@ -32,6 +32,16 @@ function platform_config()
         elseif syshost == "Nt" then
             toolset "msc"
         end
+    
+    filter "configurations:debug"
+        symbols "Full"
+    
+    filter "configurations:release-debug or release"
+        defines { "NDEBUG" }
+        optimize "On"
+    
+    filter "configurations:release-debug"
+        symbols "Full"
     
     filter ""
 end

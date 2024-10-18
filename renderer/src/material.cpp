@@ -78,7 +78,6 @@ namespace lixy {
 
     template<>
     void Material::set_uniform<EntityRef>(const std::string &p_uniform_name, const EntityRef &p_value) {
-        std::cout << "Set Uniform EntityRef" << std::endl;
         try {
             resource_uniform.at(p_uniform_name).resource = p_value;
         } catch (std::out_of_range) {}

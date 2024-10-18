@@ -26,7 +26,6 @@ namespace lixy {
         template<class T>
         void set_uniform(const std::string &p_uniform_name, const T &p_value) {
             static_assert(sizeof(T) <= 16 * sizeof(uint32_t), "Incorrect uniform size");
-            std::cout << "Set Uniform T" << std::endl;
             try {
                 memcpy(uniforms.at(p_uniform_name).data, &p_value, sizeof(p_value));
             } catch (std::out_of_range) {}

@@ -5,6 +5,11 @@
 
 namespace lixy {
 
+    bool EntityRef::is_alive() const {
+        return reference.is_alive();
+    }
+
+
     EntityRef EntityRef::create_reference(flecs::world &p_world) {
         flecs::entity reference = p_world.entity()
             .set<RefCounted>({0});

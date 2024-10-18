@@ -3,7 +3,9 @@
 
 #include "core/src/ref.hpp"
 #include "primitives/context.hpp"
+
 #include "thirdparty/flecs/flecs.h"
+#include "thirdparty/glm/glm.hpp"
 
 
 namespace lixy {
@@ -24,6 +26,9 @@ namespace lixy {
         void window_set_title(const std::string &p_title);
         bool window_should_close();
 
+        void set_current_camera(flecs::entity p_camera);
+        flecs::entity get_current_camera() const;
+
         static Renderer *get_singleton(flecs::world &p_world);
 
         Renderer() = default;
@@ -34,5 +39,9 @@ namespace lixy {
     
     private:
         opengl::OpenGLContext context;
+        
+        flecs::entity current_camera = flecs::entity::null();
+        glm::mat4 projection_matrix = glm::mat4(1.0);
+        glm::mat4 view_matrix = glm::mat4(1.0);
     };
 }

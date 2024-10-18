@@ -17,6 +17,13 @@ namespace lixy::opengl {
     }
 
 
+    bool ShaderProgram::is_bound() const {
+        int pid;
+        glGetIntegerv(GL_CURRENT_PROGRAM, &pid);
+        return ((uint32_t)pid) == program_id;
+    }
+
+
     void ShaderProgram::bind_uniform(const std::string &p_uniform_name, const float &p_value) {
         int32_t location = _get_uniform_location(p_uniform_name);
         if (location == -1) return;

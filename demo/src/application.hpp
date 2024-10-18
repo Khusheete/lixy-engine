@@ -18,7 +18,9 @@ public:
 
 private:
     flecs::world world;
-    lixy::Renderer *renderer;
 
     flecs::entity rectangle;
+    flecs::entity camera;
+
+    float rotation_angle = 0.0;
 };

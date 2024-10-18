@@ -129,6 +129,7 @@ namespace lixy::opengl {
     class ShaderProgram {
     public:
         void bind() const;
+        bool is_bound() const;
         void bind_uniform(const std::string &p_uniform_name, const float &p_value);
         void bind_uniform(const std::string &p_uniform_name, const glm::vec2 &p_value);
         void bind_uniform(const std::string &p_uniform_name, const glm::vec3 &p_value);

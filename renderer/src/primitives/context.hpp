@@ -18,6 +18,7 @@ namespace lixy::opengl {
         void set_current();
 
         // ===== Window API =====
+        inline GLFWwindow *get_window() { return window; }
         void window_set_title(const std::string &p_title);
         bool window_should_close();
         void swap_buffers();

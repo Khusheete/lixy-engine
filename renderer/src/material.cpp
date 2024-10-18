@@ -1,13 +1,21 @@
 #include "material.hpp"
+
 #include "core/src/ref.hpp"
 #include "debug/debug.hpp"
+
 #include "renderer/src/primitives/shader.hpp"
 #include "renderer/src/texture.hpp"
+
 #include <fstream>
 #include <memory>
 
 
 namespace lixy {
+
+    const std::string Material::MODEL_UNIFORM = "u_model";
+    const std::string Material::VIEW_UNIFORM = "u_view";
+    const std::string Material::PROJECTION_UNIFORM = "u_projection";
+
 
     std::string _read_file(const std::string &file_path) {
         std::fstream fi(file_path);
@@ -20,6 +28,7 @@ namespace lixy {
 
 
     void Material::bind_material() const {
+        if (program->is_bound()) return; // This function can be ignored because shader programs are currently unique
         program->bind();
 
         for (const auto &[name, uniform] : uniforms) {
@@ -45,7 +54,7 @@ namespace lixy {
             switch (uniform.type) {
             case opengl::ShaderDataType::Sampler2D:
             {
-                if (!uniform.resource.has<Texture>()) continue;
+                if (!(uniform.resource.is_alive() && uniform.resource.has<Texture>())) continue;
                 uniform.resource.get<Texture>()->bind(texture_location);
                 program->bind_uniform(name, texture_location);
                 texture_location += 1;
@@ -58,8 +67,18 @@ namespace lixy {
     }
 
 
+    void Material::bind_pvm(const glm::mat4 &p_projection, const glm::mat4 &p_view, const glm::mat4 &p_model) const {
+        if (!program->is_bound()) program->bind();
+
+        program->bind_uniform(Material::PROJECTION_UNIFORM, p_projection);
+        program->bind_uniform(Material::VIEW_UNIFORM, p_view);
+        program->bind_uniform(Material::MODEL_UNIFORM, p_model);
+    }
+
+
     template<>
     void Material::set_uniform<EntityRef>(const std::string &p_uniform_name, const EntityRef &p_value) {
+        std::cout << "Set Uniform EntityRef" << std::endl;
         try {
             resource_uniform.at(p_uniform_name).resource = p_value;
         } catch (std::out_of_range) {}
@@ -93,6 +112,10 @@ namespace lixy {
         uniforms.reserve(program->get_uniform_count());
         for (int i = 0; i < program->get_uniform_count(); i++) {
             opengl::ShaderDataType type = program->get_uniform_type(i);
+            std::string name = program->get_uniform_name(i);
+
+            if (name == Material::MODEL_UNIFORM || name == Material::VIEW_UNIFORM || name == Material::PROJECTION_UNIFORM) continue;
+
             switch (type) {
             case opengl::ShaderDataType::Float:
             case opengl::ShaderDataType::Vec2:
@@ -106,17 +129,17 @@ namespace lixy {
             case opengl::ShaderDataType::IVec3:
             case opengl::ShaderDataType::IVec4:
             case opengl::ShaderDataType::Bool:
-                uniforms[program->get_uniform_name(i)] = Uniform{
+                uniforms[name] = Uniform{
                     .type = type
                 };
                 break;
             case opengl::ShaderDataType::Sampler2D:
-                resource_uniform[program->get_uniform_name(i)] = ResourceUniform{
+                resource_uniform[name] = ResourceUniform{
                     .type = type
                 };
                 break;
             case opengl::ShaderDataType::Unknown:
-                LOG_WARNING("Unknown uniform type named: `" << program->get_uniform_name(i) << "` in shader");
+                LOG_WARNING("Unknown uniform type named: `" << name << "` in shader");
             }
             
         }

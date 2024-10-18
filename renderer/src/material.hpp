@@ -3,6 +3,7 @@
 
 #include "core/src/ref.hpp"
 #include "debug/debug.hpp"
+#include "renderer/src/mesh.hpp"
 #include "renderer/src/primitives/shader.hpp"
 #include "thirdparty/flecs/flecs.h"
 
@@ -20,10 +21,12 @@ namespace lixy {
         const std::string &get_errors() const;
 
         void bind_material() const;
+        void bind_pvm(const glm::mat4 &p_projection, const glm::mat4 &p_view, const glm::mat4 &p_model) const;
 
         template<class T>
         void set_uniform(const std::string &p_uniform_name, const T &p_value) {
             static_assert(sizeof(T) <= 16 * sizeof(uint32_t), "Incorrect uniform size");
+            std::cout << "Set Uniform T" << std::endl;
             try {
                 memcpy(uniforms.at(p_uniform_name).data, &p_value, sizeof(p_value));
             } catch (std::out_of_range) {}
@@ -54,5 +57,14 @@ namespace lixy {
         std::unique_ptr<opengl::ShaderProgram> program;
         std::unordered_map<std::string, Uniform> uniforms;
         std::unordered_map<std::string, ResourceUniform> resource_uniform; // Resources need to be implemented apart from other uniforms as they require cleanup
+    
+    private:
+        static const std::string MODEL_UNIFORM;
+        static const std::string VIEW_UNIFORM;
+        static const std::string PROJECTION_UNIFORM;
     };
+
+
+    template<>
+    void Material::set_uniform(const std::string &p_uniform_name, const EntityRef &p_value);
 }

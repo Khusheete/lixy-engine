@@ -19,9 +19,12 @@ namespace lixy {
     }
 
 
-    void ArrayMesh::record_draw() const {
+    void ArrayMesh::record_draw(const glm::mat4 &p_projection, const glm::mat4 &p_view, const glm::mat4 &p_model) const {
         for (const Surface &surface : surfaces) {
-            surface.material.get<Material>()->bind_material();
+            const Material *material = surface.material.get<Material>();
+            material->bind_material();
+            material->bind_pvm(p_projection, p_view, p_model);
+
             surface.vertex_array.bind();
             glDrawElements(GL_TRIANGLES, surface.index_count, GL_UNSIGNED_INT, nullptr);
         }

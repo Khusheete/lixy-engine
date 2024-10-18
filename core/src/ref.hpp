@@ -50,6 +50,8 @@ namespace lixy {
             return *this;
         }
 
+        bool is_alive() const;
+
         static EntityRef create_reference(flecs::world &p_world);
 
         EntityRef() = default;

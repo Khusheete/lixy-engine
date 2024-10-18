@@ -23,7 +23,7 @@ namespace lixy {
 
     class ArrayMesh {
     public:
-        void record_draw() const;
+        void record_draw(const glm::mat4 &p_projection, const glm::mat4 &p_view, const glm::mat4 &p_model) const;
         void add_surface(const std::vector<Vertex> &p_vertices, const std::vector<uint32_t> &p_indices, const EntityRef &p_material);
 
         static EntityRef create(flecs::world &p_world);

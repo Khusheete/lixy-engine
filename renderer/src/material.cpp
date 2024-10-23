@@ -6,6 +6,7 @@
 #include "renderer/src/primitives/shader.hpp"
 #include "renderer/src/texture.hpp"
 
+#include <filesystem>
 #include <fstream>
 #include <memory>
 
@@ -17,7 +18,7 @@ namespace lixy {
     const std::string Material::PROJECTION_UNIFORM = "u_projection";
 
 
-    std::string _read_file(const std::string &file_path) {
+    std::string _read_file(const std::filesystem::path &file_path) {
         std::fstream fi(file_path);
         std::stringstream string_buffer;
         string_buffer << fi.rdbuf();
@@ -99,7 +100,7 @@ namespace lixy {
     }
 
 
-    EntityRef Material::load(flecs::world &p_world, const std::string &p_vertex_path, const std::string &p_fragment_path) {
+    EntityRef Material::load(flecs::world &p_world, const std::filesystem::path &p_vertex_path, const std::filesystem::path &p_fragment_path) {
         return Material::create_from_source(p_world, _read_file(p_vertex_path), _read_file(p_fragment_path));
     }
 

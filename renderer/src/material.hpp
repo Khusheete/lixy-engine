@@ -11,6 +11,7 @@
 #include <memory>
 #include <stdexcept>
 #include <unordered_map>
+#include <filesystem>
 
 
 namespace lixy {
@@ -31,7 +32,7 @@ namespace lixy {
             } catch (std::out_of_range) {}
         }
 
-        static EntityRef load(flecs::world &p_world, const std::string &p_vertex_path, const std::string &p_fragment_path);
+        static EntityRef load(flecs::world &p_world, const std::filesystem::path &p_vertex_path, const std::filesystem::path &p_fragment_path);
         static EntityRef create_from_source(flecs::world &p_world, const std::string &p_vertex_source, const std::string &p_fragment_source);
 
         Material() = default;

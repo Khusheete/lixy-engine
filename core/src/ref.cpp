@@ -42,7 +42,9 @@ namespace lixy {
     EntityRef::EntityRef(const EntityRef &p_other)
         : reference(p_other.reference)
     {
-        reference.get_mut<RefCounted>()->reference_count += 1;
+        if (reference.is_alive()) {
+            reference.get_mut<RefCounted>()->reference_count += 1;
+        }
     }
 
 
@@ -52,7 +54,9 @@ namespace lixy {
         }
 
         reference = p_other.reference;
-        reference.get_mut<RefCounted>()->reference_count += 1;
+        if (reference.is_alive()) {
+            reference.get_mut<RefCounted>()->reference_count += 1;
+        }
         return *this;
     }
 

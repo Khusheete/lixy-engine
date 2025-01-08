@@ -1,0 +1,12 @@
+# Blender 4.2.3 LTS MTL File: 'shaderball.blend'
+# www.blender.org
+
+newmtl Shaderball
+Ns 250.000000
+Ka 0.254545 0.254545 0.254545
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+map_Kd -s 0.5 0.5 0.5 4K-abstract_2-diffuse.jpg

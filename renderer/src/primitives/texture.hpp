@@ -26,7 +26,8 @@
 namespace lixy::opengl {
 
     enum class TextureFormat {
-        R8, RG8, RGB8, RGBA8
+        R8, RG8, RGB8, RGBA8,
+        R16, RG16, RGB16, RGBA16
     };
 
     

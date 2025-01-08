@@ -20,8 +20,6 @@
 
 
 #include "core/src/ref.hpp"
-#include "debug/debug.hpp"
-#include "renderer/src/mesh.hpp"
 #include "renderer/src/primitives/shader.hpp"
 #include "thirdparty/flecs/flecs.h"
 
@@ -55,7 +53,8 @@ namespace lixy {
 
         Material() = default;
         Material(const std::string &p_vertex_source, const std::string &p_fragment_source);
-        Material(const Material&) = delete;
+        Material(const Material&) = default;
+        Material &operator=(const Material&) = default;
         Material(Material&&) = default;
         Material &operator=(Material&&) = default;
         virtual ~Material() = default;
@@ -72,7 +71,7 @@ namespace lixy {
         };
 
     private:
-        std::unique_ptr<opengl::ShaderProgram> program;
+        std::shared_ptr<opengl::ShaderProgram> program;
         std::unordered_map<std::string, Uniform> uniforms;
         std::unordered_map<std::string, ResourceUniform> resource_uniform; // Resources need to be implemented apart from other uniforms as they require cleanup
     

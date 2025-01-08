@@ -124,7 +124,7 @@ namespace lixy {
 
 
     Material::Material(const std::string &p_vertex_source, const std::string &p_fragment_source) {
-        program = std::make_unique<opengl::ShaderProgram>(p_vertex_source, p_fragment_source);
+        program = std::make_shared<opengl::ShaderProgram>(p_vertex_source, p_fragment_source);
 
         // Get uniforms
         uniforms.reserve(program->get_uniform_count());

@@ -88,7 +88,10 @@ namespace lixy::opengl {
         void bind() const;
         void unbind() const;
 
-        VertexArrayBuffer(std::shared_ptr<VertexBuffer> p_vertex_buffer, std::shared_ptr<IndexBuffer> p_index_buffer, const BufferLayout &p_buffer_layout);
+        void add_vertex_buffer(std::shared_ptr<VertexBuffer> p_vertex_buffer, const BufferLayout &p_buffer_layout);
+        void add_index_buffer(std::shared_ptr<IndexBuffer> p_index_buffer);
+
+        VertexArrayBuffer();
         VertexArrayBuffer(const VertexArrayBuffer&) = delete;
         VertexArrayBuffer(VertexArrayBuffer &&p_other);
         VertexArrayBuffer &operator=(VertexArrayBuffer &&p_other);
@@ -96,8 +99,9 @@ namespace lixy::opengl {
 
     private:
         uint32_t array_index;
+        uint32_t vertex_attrib_count;
 
-        std::shared_ptr<VertexBuffer> vertex_buffer;
-        std::shared_ptr<IndexBuffer> index_buffer;
+        std::vector<std::shared_ptr<VertexBuffer>> vertex_buffers;
+        std::vector<std::shared_ptr<IndexBuffer>> index_buffers;
     };
 }

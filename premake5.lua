@@ -65,5 +65,6 @@ end
 
 include "core/build.lua"
 include "thirdparty/build.lua"
+include "wavefront_loader/build.lua"
 include "renderer/build.lua"
 include "demo/build.lua"

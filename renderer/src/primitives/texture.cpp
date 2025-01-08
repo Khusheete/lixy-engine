@@ -100,6 +100,22 @@ namespace lixy::opengl {
             internal_format = GL_RGBA8;
             format = GL_RGBA;
             break;
+        case TextureFormat::R16:
+            internal_format = GL_R16;
+            format = GL_RED;
+            break;
+        case TextureFormat::RG16:
+            internal_format = GL_RG16;
+            format = GL_RG;
+            break;
+        case TextureFormat::RGB16: // TODO: check conversion
+            internal_format = GL_RGB16;
+            format = GL_RGB;
+            break;
+        case TextureFormat::RGBA16:
+            internal_format = GL_RGBA16;
+            format = GL_RGBA;
+            break;
         }
 
         bind();

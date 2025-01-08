@@ -35,9 +35,10 @@ namespace lixy {
 
         // Add components
         p_world.add<ArrayMesh>();
+        p_world.add<ObjMesh>();
         p_world.add<Material>();
         p_world.add<Texture>();
-        p_world.add<ArrayMeshInstance>();
+        p_world.add<MeshInstance>();
         p_world.add<Visible>();
 
         // Initialize renderer singleton

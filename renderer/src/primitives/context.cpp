@@ -42,6 +42,8 @@ namespace lixy::opengl {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
 
+        glEnable(GL_DEPTH_TEST);
+
         if (instance_count == 0) {
             ASSERT_FATAL_ERROR(glewInit() == GLEW_OK, "Could not initialize glew");
         }

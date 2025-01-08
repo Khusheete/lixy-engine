@@ -22,6 +22,7 @@
 #include "core/src/ref.hpp"
 #include "primitives/context.hpp"
 
+#include "renderer/src/material.hpp"
 #include "thirdparty/flecs/flecs.h"
 #include "thirdparty/glm/glm.hpp"
 
@@ -31,8 +32,8 @@ namespace lixy {
     struct RendererModule;
 
     
-    struct ArrayMeshInstance {
-        EntityRef array_mesh;
+    struct MeshInstance {
+        EntityRef mesh;
     };
 
 
@@ -46,6 +47,8 @@ namespace lixy {
 
         void set_current_camera(flecs::entity p_camera);
         flecs::entity get_current_camera() const;
+
+        EntityRef create_default_material(flecs::world &p_world);
 
         static Renderer *get_singleton(flecs::world &p_world);
 
@@ -61,5 +64,7 @@ namespace lixy {
         flecs::entity current_camera = flecs::entity::null();
         glm::mat4 projection_matrix = glm::mat4(1.0);
         glm::mat4 view_matrix = glm::mat4(1.0);
+
+        Material default_material;
     };
 }

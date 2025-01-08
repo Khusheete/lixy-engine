@@ -41,3 +41,11 @@ if (!(predicate)) {                                                     \
     LOG_ERROR(error.str());                                             \
     throw std::runtime_error(error.str());                              \
 }
+
+
+#define ASSERT_WARNING(predicate, warning_str)                              \
+if (!(predicate)) {                                                         \
+    std::stringstream error;                                                \
+    error << "Assertion `" << #predicate << "` failed: " << warning_str;    \
+    LOG_WARNING(error.str());                                               \
+}

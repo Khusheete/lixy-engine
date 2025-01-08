@@ -34,9 +34,9 @@
 #include "thirdparty/glm/trigonometric.hpp"
 
 #include <GL/gl.h>
-#include <array>
+// #include <array>
 #include <cstdlib>
-#include <memory>
+// #include <memory>
 
 
 void DemoApplication::main_loop() {
@@ -47,8 +47,8 @@ void DemoApplication::main_loop() {
         lixy::Transform *camera_trasnform = camera.get_mut<lixy::Transform>();
         camera_trasnform->set_position(glm::vec3(
             1.0 * glm::cos(rotation_angle),
-            1.0 * glm::sin(rotation_angle),
-            1.0
+            1.0 + 1.0 * glm::sin(rotation_angle),
+            2.0
         ));
 
         // Progress world
@@ -69,34 +69,36 @@ DemoApplication::DemoApplication() {
     ASSERT_FATAL_ERROR(texture.get<lixy::Texture>()->is_valid(), "Image not valid");
 
     // Create material
-    lixy::EntityRef material = lixy::Material::load(world, "assets/shaders/shader.vert", "assets/shaders/shader.frag");
-    lixy::Material *material_component = material.get_mut<lixy::Material>();
-    ASSERT_FATAL_ERROR(
-        material_component->is_valid(),
-        "Failed to load shaders" << material_component->get_errors()
-    );
-    material_component->set_uniform("u_color", glm::vec3(1.0, 0.0, 1.0));
-    material_component->set_uniform("u_texture", texture);
+    // lixy::EntityRef material = lixy::Material::load(world, "assets/shaders/shader.vert", "assets/shaders/shader.frag");
+    // lixy::Material *material_component = material.get_mut<lixy::Material>();
+    // ASSERT_FATAL_ERROR(
+    //     material_component->is_valid(),
+    //     "Failed to load shaders" << material_component->get_errors()
+    // );
+    // material_component->set_uniform("u_color", glm::vec3(1.0, 0.0, 1.0));
+    // material_component->set_uniform("u_texture", texture);
 
     // Create mesh
-    std::vector<lixy::Vertex> vertices = {
-        {{-0.5f, -0.5f, 0.0f}, {0.0, 0.0}},
-        {{ 0.5f, -0.5f, 0.0f}, {1.0, 0.0}},
-        {{-0.5f,  0.5f, 0.0f}, {0.0, 1.0}},
-        {{ 0.5f,  0.5f, 0.0f}, {1.0, 1.0}},
-    };
+    lixy::EntityRef shaderball = lixy::ObjMesh::load(world, "assets/models/shaderball.obj");
 
-    std::vector<uint32_t> indices {
-        0, 1, 2, 2, 3, 1
-    };
+    // std::vector<lixy::Vertex> vertices = {
+    //     {{-0.5f, -0.5f, 0.0f}, {0.0, 0.0}},
+    //     {{ 0.5f, -0.5f, 0.0f}, {1.0, 0.0}},
+    //     {{-0.5f,  0.5f, 0.0f}, {0.0, 1.0}},
+    //     {{ 0.5f,  0.5f, 0.0f}, {1.0, 1.0}},
+    // };
 
-    lixy::EntityRef mesh = lixy::ArrayMesh::create(world);
-    mesh.get_mut<lixy::ArrayMesh>()->add_surface(vertices, indices, material);
+    // std::vector<uint32_t> indices {
+    //     0, 1, 2, 2, 3, 1
+    // };
+
+    // lixy::EntityRef mesh = lixy::ArrayMesh::create(world);
+    // mesh.get_mut<lixy::ArrayMesh>()->add_surface(vertices, indices, material);
 
     // Create rectangle entity
     rectangle = world.entity()
         .set<lixy::Transform>({})
-        .set<lixy::ArrayMeshInstance>({mesh})
+        .set<lixy::MeshInstance>({shaderball})
         .add<lixy::Visible>();
     
     rectangle.get_mut<lixy::Transform>()->set_position(glm::vec3(0.0, 0.0, -1.0));

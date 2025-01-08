@@ -114,39 +114,44 @@ namespace lixy::opengl {
     }
 
 
-    VertexArrayBuffer::VertexArrayBuffer(std::shared_ptr<VertexBuffer> p_vertex_buffer, std::shared_ptr<IndexBuffer> p_index_buffer, const BufferLayout &p_buffer_layout)
-        : vertex_buffer(p_vertex_buffer),
-        index_buffer(p_index_buffer)
-    {
-        glGenVertexArrays(1, &array_index);
+    void VertexArrayBuffer::add_vertex_buffer(std::shared_ptr<VertexBuffer> p_vertex_buffer, const BufferLayout &p_buffer_layout) {
         bind();
-
-        // Bind vertex buffer
         p_vertex_buffer->bind();
 
         for (uint32_t i = 0; i < p_buffer_layout.get_layout_length(); i++) {
-            glEnableVertexAttribArray(i);
             glVertexAttribPointer(
-                i,
+                vertex_attrib_count + i,
                 p_buffer_layout.get_attribute_component_count(i),
                 p_buffer_layout.get_attribute_gl_type(i),
                 GL_FALSE,
                 p_buffer_layout.get_stride(),
                 reinterpret_cast<void*>(p_buffer_layout.get_attribute_offset(i))
             );
+            glEnableVertexAttribArray(vertex_attrib_count + i);
         }
-
-        // Bind index buffer
-        index_buffer->bind();
-
+        vertex_attrib_count += p_buffer_layout.get_layout_length();
         unbind();
+        vertex_buffers.push_back(p_vertex_buffer);
+    }
+
+
+    void VertexArrayBuffer::add_index_buffer(std::shared_ptr<IndexBuffer> p_index_buffer) {
+        bind();
+        p_index_buffer->bind();
+        unbind();
+        index_buffers.push_back(p_index_buffer);
+    }
+
+
+    VertexArrayBuffer::VertexArrayBuffer() {
+        glGenVertexArrays(1, &array_index);
     }
 
 
     VertexArrayBuffer::VertexArrayBuffer(VertexArrayBuffer &&p_other)
         : array_index(p_other.array_index),
-        vertex_buffer(p_other.vertex_buffer),
-        index_buffer(p_other.index_buffer)
+        vertex_buffers(p_other.vertex_buffers),
+        index_buffers(p_other.index_buffers)
     {
         p_other.array_index = 0;
     }
@@ -158,8 +163,8 @@ namespace lixy::opengl {
         }
 
         array_index = p_other.array_index;
-        vertex_buffer = p_other.vertex_buffer;
-        index_buffer = p_other.index_buffer;
+        vertex_buffers = std::move(p_other.vertex_buffers);
+        index_buffers = std::move(p_other.index_buffers);
 
         p_other.array_index = 0;
         
@@ -169,7 +174,6 @@ namespace lixy::opengl {
 
     VertexArrayBuffer::~VertexArrayBuffer() {
         if (!array_index) return;
-
         glDeleteVertexArrays(1, &array_index);
     }
 }

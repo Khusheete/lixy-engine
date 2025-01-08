@@ -26,6 +26,7 @@
 #include "thirdparty/flecs/flecs.h"
 #include "thirdparty/glm/glm.hpp"
 
+#include <filesystem>
 #include <memory>
 
 
@@ -62,6 +63,34 @@ namespace lixy {
         };
 
     private:
+        std::vector<Surface> surfaces;
+    };
+
+
+    class ObjMesh {
+    public:
+        void record_draw(const glm::mat4 &p_projection, const glm::mat4 &p_view, const glm::mat4 &p_model) const;
+
+        static EntityRef load(flecs::world &p_world, const std::filesystem::path &p_path);
+
+        ObjMesh() = default;
+        ObjMesh(ObjMesh&&) = default;
+        ObjMesh &operator=(ObjMesh&&) = default;
+        virtual ~ObjMesh() = default;
+
+    private:
+        struct Surface {
+            EntityRef material;
+            std::shared_ptr<opengl::IndexBuffer> indices;
+            uint32_t index_count;
+        };
+    
+    private:
+        static const opengl::BufferLayout &get_vertex_buffer_layout();
+
+    private:
+        std::unique_ptr<opengl::VertexArrayBuffer> vertex_array;
+        std::shared_ptr<opengl::VertexBuffer> vertex_buffer;
         std::vector<Surface> surfaces;
     };
 }

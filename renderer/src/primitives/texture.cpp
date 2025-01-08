@@ -79,44 +79,31 @@ namespace lixy::opengl {
     }
 
 
+    Texture2D::Texture2D(int p_width, int p_height, TextureFormat p_format) {
+        glGenTextures(1, &texture_id);
+
+        uint32_t internal_format, format;
+        Texture2D::get_opengl_format(p_format, &internal_format, &format);
+
+        bind();
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, internal_format, p_width, p_height, 0, format, GL_UNSIGNED_BYTE, nullptr);
+
+        unbind();
+        valid = true;
+    }
+
+
     Texture2D::Texture2D(const void *p_data, int p_width, int p_height, TextureFormat p_format) {
         glGenTextures(1, &texture_id);
 
         uint32_t internal_format, format;
-        switch (p_format) {
-        case TextureFormat::R8:
-            internal_format = GL_R8;
-            format = GL_RED;
-            break;
-        case TextureFormat::RG8:
-            internal_format = GL_RG8;
-            format = GL_RG;
-            break;
-        case TextureFormat::RGB8: // TODO: check conversion
-            internal_format = GL_RGB8;
-            format = GL_RGB;
-            break;
-        case TextureFormat::RGBA8:
-            internal_format = GL_RGBA8;
-            format = GL_RGBA;
-            break;
-        case TextureFormat::R16:
-            internal_format = GL_R16;
-            format = GL_RED;
-            break;
-        case TextureFormat::RG16:
-            internal_format = GL_RG16;
-            format = GL_RG;
-            break;
-        case TextureFormat::RGB16: // TODO: check conversion
-            internal_format = GL_RGB16;
-            format = GL_RGB;
-            break;
-        case TextureFormat::RGBA16:
-            internal_format = GL_RGBA16;
-            format = GL_RGBA;
-            break;
-        }
+        Texture2D::get_opengl_format(p_format, &internal_format, &format);
 
         bind();
 
@@ -153,6 +140,43 @@ namespace lixy::opengl {
         p_other.valid = 0;
 
         return *this;
+    }
+
+    void Texture2D::get_opengl_format(TextureFormat p_tex_format, uint32_t *p_internal_format, uint32_t *p_format) {
+        switch (p_tex_format) {
+        case TextureFormat::R8:
+            *p_internal_format = GL_R8;
+            *p_format = GL_RED;
+            break;
+        case TextureFormat::RG8:
+            *p_internal_format = GL_RG8;
+            *p_format = GL_RG;
+            break;
+        case TextureFormat::RGB8: // TODO: check conversion
+            *p_internal_format = GL_RGB8;
+            *p_format = GL_RGB;
+            break;
+        case TextureFormat::RGBA8:
+            *p_internal_format = GL_RGBA8;
+            *p_format = GL_RGBA;
+            break;
+        case TextureFormat::R16:
+            *p_internal_format = GL_R16;
+            *p_format = GL_RED;
+            break;
+        case TextureFormat::RG16:
+            *p_internal_format = GL_RG16;
+            *p_format = GL_RG;
+            break;
+        case TextureFormat::RGB16: // TODO: check conversion
+            *p_internal_format = GL_RGB16;
+            *p_format = GL_RGB;
+            break;
+        case TextureFormat::RGBA16:
+            *p_internal_format = GL_RGBA16;
+            *p_format = GL_RGBA;
+            break;
+        }
     }
     
     

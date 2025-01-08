@@ -49,10 +49,14 @@ namespace lixy::opengl {
         static Texture2D load(const std::string &p_path);
 
         Texture2D() = default;
+        Texture2D(int p_width, int p_height, TextureFormat p_format);
         Texture2D(const void *p_data, int p_width, int p_height, TextureFormat p_format);
         Texture2D(Texture2D &&p_other);
         Texture2D &operator=(Texture2D &&p_other);
         virtual ~Texture2D();
+
+    private:
+        void get_opengl_format(TextureFormat p_tex_format, uint32_t *p_internal_format, uint32_t *p_format);
 
     private:
         uint32_t texture_id;

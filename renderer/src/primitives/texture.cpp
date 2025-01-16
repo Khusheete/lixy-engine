@@ -66,7 +66,7 @@ namespace lixy::opengl {
     Texture2D Texture2D::load(const std::string &p_path) {
         int width, height, channel_count;
         stbi_set_flip_vertically_on_load(1);
-        unsigned char *image_data = stbi_load(p_path.c_str(), &width, &height, &channel_count, 4);
+        unsigned char *image_data = stbi_load(p_path.c_str(), &width, &height, &channel_count, 0);
         
         if (!image_data) {
             LOG_ERROR("Could not laod image at " << p_path);

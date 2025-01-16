@@ -1,6 +1,7 @@
 #include "object.hpp"
 #include "debug/debug.hpp"
 
+#include "thirdparty/glm/fwd.hpp"
 #include "thirdparty/glm/glm.hpp"
 
 #include <fstream>
@@ -8,6 +9,27 @@
 
 
 namespace lixy {
+
+    bool WavefrontMaterial::has_ambient_texture() const {
+        return !ambient_texture.path.empty();
+    }
+
+
+    bool WavefrontMaterial::has_diffuse_texture() const {
+        return !diffuse_texture.path.empty();
+    }
+
+
+    bool WavefrontMaterial::has_specular_texture() const {
+        return !specular_texture.path.empty();
+    }
+
+
+    bool WavefrontMaterial::has_specular_exponent_texture() const {
+        return !specular_exponent_texture.path.empty();
+    }
+
+
     template<class e, class t>
     std::basic_istream<e,t>& operator>>(std::basic_istream<e,t>& in, const e& cliteral) { // FIXME: don't use that
             e buffer(0);
@@ -79,8 +101,10 @@ namespace lixy {
                 mesh.objects[token] = WavefrontObject{};
                 current_object = &mesh.objects[token];
             } else if  (token == "mtllib") {
-                file >> token;
-                mesh._include_materials(token);
+                std::filesystem::path material_path;
+                file >> material_path;
+                material_path = p_path.parent_path() / material_path;
+                mesh._include_materials(material_path);
             } else if (token == "usemtl") {
                 if (!current_object) {
                     LOG_WARNING("Could not load mesh at `" << p_path << "` missing object");
@@ -96,8 +120,90 @@ namespace lixy {
     }
 
 
+    WavefrontMaterial::TextureMap _parse_texture_map(std::istream &p_stream) {
+        WavefrontMaterial::TextureMap map = {};
+
+        std::string token;
+
+        while (p_stream.good()) {
+            p_stream >> token;
+
+            if (token == "-o") {
+                p_stream >> map.origin_offset.x >> map.origin_offset.y >> map.origin_offset.z;
+            } else if (token == "-s") {
+                p_stream >> map.scale.x >> map.scale.y >> map.scale.z;
+            } else if (token == "-blendu" || token == "-blendv" || token == "-bm" || token == "-boost" || token == "-cc"
+                || token == "-clamp" || token == "-imfchan" || token == "-texres")
+            { // discard options
+                p_stream >> token;
+            } else if (token == "-mm") {
+                p_stream >> token >> token;
+            } else if (token == "-t") {
+                p_stream >> token >> token >> token;
+            } else {
+                map.path = token;
+            }
+        }
+
+        return map;
+    }
+
+
     void WavefrontMesh::_include_materials(const std::filesystem::path &p_path) {
-        // TODO: implement
-        LOG_WARNING("Material template library at `" << p_path << "` was not loaded (MISSING IMPLEMENTATION)");
+        std::ifstream file(p_path);
+        WavefrontMaterial *current_material = nullptr;
+        std::string token;
+
+        while (file.good()) {
+            file >> token;
+
+            if (current_material == nullptr && token != "newmtl" && token != "#") {
+                LOG_WARNING("Trying to set material properties to non-existant material in `" << p_path << "`.");
+                return;
+            }
+
+            if (token == "newmtl") {
+                file >> token;
+                materials[token] = WavefrontMaterial{};
+                current_material = &materials[token];
+            } else if (token == "illum") {
+                unsigned int illum_model;
+                file >> illum_model;
+                current_material->illumination_model = (WavefrontMaterial::IlluminationModel)illum_model;
+            } else if (token == "Ka") {
+                file >> current_material->ambient_color.x >> current_material->ambient_color.y >> current_material->ambient_color.z;
+            } else if (token == "Kd") {
+                file >> current_material->diffuse_color.x >> current_material->diffuse_color.y >> current_material->diffuse_color.z;
+            } else if (token == "Ks") {
+                file >> current_material->specular_color.x >> current_material->specular_color.y >> current_material->specular_color.z;
+            } else if (token == "Ns") {
+                file >> current_material->specular_exponent;
+            } else if (token == "Tr") {
+                file >> current_material->dissolve;
+                current_material->dissolve = 1.0 - current_material->dissolve;
+            } else if (token == "d") {
+                file >> current_material->dissolve;
+            } else if (token == "Tf") {
+                file >> current_material->transmission_filter_color.x >> current_material->transmission_filter_color.y >> current_material->transmission_filter_color.z;
+            } else if (token == "Ni") {
+                file >> current_material->index_of_refraction;
+            } else if (token.substr(0, 4) == "map_") {
+                std::string map_type = token.substr(4);
+                WavefrontMaterial::TextureMap map = _parse_texture_map(file);
+                map.path = p_path.parent_path() / map.path; // To a valid relative path
+
+                if (map_type == "Ka") {
+                    current_material->ambient_texture = map;
+                } else if (map_type == "Kd") {
+                    current_material->diffuse_texture = map;
+                } else if (map_type == "Ks") {
+                    current_material->specular_texture = map;
+                } else if (map_type == "Ns") {
+                    current_material->specular_exponent_texture = map;
+                }
+            } else if (token == "s" || token == "#") {
+                std::getline(file, token); // Ignore tokens
+            }
+        }
     }
 }

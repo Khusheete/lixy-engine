@@ -74,11 +74,13 @@ namespace lixy {
         "layout(location = 1) out vec4 out_color;"
         "layout(location = 2) out vec4 out_normal;"
         ""
-        "uniform sampler2D u_albedo;"
+        "uniform sampler2D u_albedo_texture;"
+        "uniform vec3 u_albedo_offset = vec3(0.0, 0.0, 0.0);"
+        "uniform vec3 u_albedo_scale = vec3(1.0, 1.0, 1.0);"
         ""
         "void main() {"
         "    out_position = position;"
-        "    out_color = vec4(normal, 1.0);/* texture(u_albedo, tex_coord); */"
+        "    out_color = texture(u_albedo_texture, u_albedo_offset.xy + tex_coord * u_albedo_scale.xy);"
         "    out_normal = vec4(normalize(normal), 1.0);" // FIXME: use a vec3 - currently using a vec3 gives nonsense images
         "}";
 

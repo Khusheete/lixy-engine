@@ -19,10 +19,13 @@
 #include "mesh.hpp"
 
 #include "core/src/ref.hpp"
+#include "debug/debug.hpp"
 #include "renderer/src/material.hpp"
 #include "renderer/src/primitives/shader.hpp"
 #include "renderer/src/primitives/vbuffer.hpp"
 #include "renderer/src/renderer.hpp"
+#include "renderer/src/texture.hpp"
+#include "thirdparty/flecs/flecs.h"
 #include "wavefront_loader/src/object.hpp"
 
 #include <array>
@@ -99,8 +102,6 @@ namespace lixy {
 
         mesh->vertex_array = std::make_unique<opengl::VertexArrayBuffer>();
 
-        EntityRef default_material = Renderer::get_singleton(p_world)->create_default_material(p_world);
-
         // Load mesh from the file
         WavefrontMesh wavefront = WavefrontMesh::load(p_path);
 
@@ -116,6 +117,7 @@ namespace lixy {
 
         for (auto element : wavefront.objects) {
             WavefrontObject object = element.second;
+            WavefrontMaterial mat = wavefront.materials[object.material];
 
             object_indices.reserve(object.position_indices.size());
             object_index_buffer_size = 0;
@@ -167,7 +169,20 @@ namespace lixy {
 
             // Create surface
             Surface surface{};
-            surface.material = default_material;
+            
+            surface.material = Renderer::get_singleton(p_world)->create_default_material(p_world);
+            Material *material_component = surface.material.get_mut<Material>();
+
+            if (mat.has_diffuse_texture()) {
+                EntityRef texture = Texture::load_texture2d(p_world, mat.diffuse_texture.path);
+                material_component->set_uniform("u_albedo_texture", texture);
+                material_component->set_uniform("u_albedo_offset", mat.diffuse_texture.origin_offset);
+                material_component->set_uniform("u_albedo_scale", mat.diffuse_texture.scale);
+            } else {
+                LOG_WARNING("No diffuse texture for mesh at: `" << p_path << "`");
+            }
+
+
             surface.indices = std::make_shared<opengl::IndexBuffer>(
                 object_indices.data(),
                 object_index_buffer_size

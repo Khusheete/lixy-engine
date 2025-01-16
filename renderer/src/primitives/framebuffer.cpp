@@ -83,6 +83,7 @@ namespace lixy::opengl {
         width = p_other.width;
         height = p_other.height;
         texture_attachments = std::move(p_other.texture_attachments);
+        depth_stensil_attachment = std::move(p_other.depth_stensil_attachment);
         p_other.buffer_id = 0;
     }
     
@@ -95,6 +96,7 @@ namespace lixy::opengl {
         width = p_other.width;
         height = p_other.height;
         texture_attachments = std::move(p_other.texture_attachments);
+        depth_stensil_attachment = std::move(p_other.depth_stensil_attachment);
         p_other.buffer_id = 0;
 
         return *this;

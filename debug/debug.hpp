@@ -24,14 +24,14 @@
 #include <sstream>
 
 
-#define BOLD "\e[1m"
-#define YELLOW "\e[38;2;180;180;20m"
-#define RED "\e[38;2;220;50;50m"
-#define CLEAR "\e[0m"
+#define CSI_BOLD "\e[1m"
+#define CSI_YELLOW "\e[38;2;180;180;20m"
+#define CSI_RED "\e[38;2;220;50;50m"
+#define CSI_CLEAR "\e[0m"
 
 
-#define LOG_WARNING(warning) std::cerr << YELLOW << BOLD << "[WARNING] " << CLEAR << YELLOW << warning << CLEAR << std::endl
-#define LOG_ERROR(error) std::cerr << RED << BOLD << "[ERROR] " << CLEAR << RED << error << CLEAR << std::endl
+#define LOG_WARNING(warning) std::cerr << CSI_YELLOW << CSI_BOLD << "[WARNING] " << CSI_CLEAR << CSI_YELLOW << warning << CSI_CLEAR << std::endl
+#define LOG_ERROR(error) std::cerr << CSI_RED << CSI_BOLD << "[ERROR] " << CSI_CLEAR << CSI_RED << error << CSI_CLEAR << std::endl
 
 
 #define ASSERT_FATAL_ERROR(predicate, error_str)                        \

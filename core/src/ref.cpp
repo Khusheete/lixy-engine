@@ -28,6 +28,12 @@ namespace lixy {
     }
 
 
+    EntityRef &EntityRef::add(flecs::entity_t p_first, flecs::entity_t p_second) {
+        reference.add(p_first, p_second);
+        return *this;
+    }
+
+
     EntityRef EntityRef::create_reference(flecs::world &p_world) {
         flecs::entity reference = p_world.entity()
             .set<RefCounted>({0});

@@ -117,17 +117,19 @@ namespace lixy::opengl {
     void VertexArrayBuffer::add_vertex_buffer(std::shared_ptr<VertexBuffer> p_vertex_buffer, const BufferLayout &p_buffer_layout) {
         bind();
         p_vertex_buffer->bind();
-
+        
         for (uint32_t i = 0; i < p_buffer_layout.get_layout_length(); i++) {
+            // FIXME: `index` argument corruption. mesa-driver bug ?
+            uint32_t index = vertex_attrib_count + i;
             glVertexAttribPointer(
-                vertex_attrib_count + i,
+                index,
                 p_buffer_layout.get_attribute_component_count(i),
                 p_buffer_layout.get_attribute_gl_type(i),
                 GL_FALSE,
                 p_buffer_layout.get_stride(),
                 reinterpret_cast<void*>(p_buffer_layout.get_attribute_offset(i))
             );
-            glEnableVertexAttribArray(vertex_attrib_count + i);
+            glEnableVertexAttribArray(index);
         }
         vertex_attrib_count += p_buffer_layout.get_layout_length();
         unbind();

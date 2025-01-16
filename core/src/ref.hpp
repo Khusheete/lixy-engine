@@ -56,6 +56,8 @@ namespace lixy {
             return *this;
         }
 
+        EntityRef &add(flecs::entity_t p_first, flecs::entity_t p_second);
+
         template<typename Component>
         EntityRef &remove() {
             reference.remove<Component>();

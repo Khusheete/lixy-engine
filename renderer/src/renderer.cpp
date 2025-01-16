@@ -21,15 +21,22 @@
 #include "core/src/transform.hpp"
 #include "debug/debug.hpp"
 #include "renderer/src/camera.hpp"
+#include "renderer/src/framebuffer.hpp"
 #include "renderer/src/material.hpp"
 #include "renderer/src/mesh.hpp"
 
 #include "renderer/src/primitives/context.hpp"
+#include "renderer/src/primitives/framebuffer.hpp"
+#include "renderer/src/primitives/shader.hpp"
+#include "renderer/src/primitives/texture.hpp"
+#include "renderer/src/primitives/vbuffer.hpp"
 #include "thirdparty/flecs/flecs.h"
 #include "thirdparty/glm/ext/matrix_clip_space.hpp"
 #include "thirdparty/glm/matrix.hpp"
 
 #include <GLFW/glfw3.h>
+#include <array>
+#include <memory>
 
 
 namespace lixy {
@@ -52,23 +59,56 @@ namespace lixy {
         "void main() {"
         "    gl_Position = u_projection * u_view * u_model * vec4(position, 1.0);"
         "    out_position = gl_Position;"
-        "    out_normal = normal;" // FIXME: project normal
+        "    out_normal = (u_projection * u_view * u_model * vec4(normal, 0.0)).xyz;" // FIXME: project normal
         "    out_tex_coord = tex_coord;"
         "}";
     
     static const std::string DEFAULT_FRAGMENT_SHADER =
         "#version 420 core\n"
         ""
-        "layout(location = 0) in vec4 pos;"
+        "layout(location = 0) in vec4 position;"
         "layout(location = 1) in vec3 normal;"
         "layout(location = 2) in vec2 tex_coord;"
         ""
-        "layout(location = 0) out vec4 out_color;"
+        "layout(location = 0) out vec4 out_position;"
+        "layout(location = 1) out vec4 out_color;"
+        "layout(location = 2) out vec4 out_normal;"
         ""
         "uniform sampler2D u_albedo;"
         ""
         "void main() {"
+        "    out_position = position;"
         "    out_color = vec4(normal, 1.0);/* texture(u_albedo, tex_coord); */"
+        "    out_normal = vec4(normalize(normal), 1.0);" // FIXME: use a vec3 - currently using a vec3 gives nonsense images
+        "}";
+
+
+    static const std::string SCREEN_VERTEX_SHADER =
+        "#version 420 core\n"
+        ""
+        "layout(location = 0) in vec2 position;"
+        "layout(location = 1) in vec2 uv;"
+        ""
+        "layout(location = 1) out vec2 out_uv;"
+        ""
+        "void main() {"
+        "    gl_Position = vec4(position, 0.0, 0.0);"
+        "    out_uv = uv;"
+        "}";
+
+    static const std::string SCREEN_FRAGMENT_SHADER =
+        "#version 420 core\n"
+        ""
+        "layout(location = 1) in vec2 uv;"
+        ""
+        "layout(location = 0) out vec4 out_color;"
+        ""
+        "uniform sampler2D u_position;"
+        "uniform sampler2D u_color;"
+        "uniform sampler2D u_normal;"
+        ""
+        "void main() {"
+        "    out_color = texture(u_color, uv);"
         "}";
 
 
@@ -109,9 +149,57 @@ namespace lixy {
         // Create opengl context
         context.initialize();
 
-        // Create default material
+        // Create gbuffer
+        std::vector<opengl::TextureFormat> g_framebuffer_formats = {
+            opengl::TextureFormat::RGBA8, // Position
+            opengl::TextureFormat::RGBA8, // Albedo
+            opengl::TextureFormat::RGBA8, // Normal
+        };
+        int width, height; // FIXME: width and height should be managed inside the windowing system
+        glfwGetFramebufferSize(context.get_window(), &width, &height);
+        gbuffer_ref = Framebuffer::create(p_world, width, height, g_framebuffer_formats);
+        ASSERT_FATAL_ERROR(gbuffer_ref.get<Framebuffer>()->is_complete(), "Incomplete GBuffer");
+
+        // Create materials
         default_material = Material(DEFAULT_VERTEX_SHADER, DEFAULT_FRAGMENT_SHADER);
         ASSERT_FATAL_ERROR(default_material.is_valid(), "The default material is invalid: " << default_material.get_errors());
+
+        // Create surface to render on the screen
+        const std::array<glm::vec2, 8> quad_vertices_array = {
+            glm::vec2(-1.0, -1.0), glm::vec2(0.0, 0.0),
+            glm::vec2(1.0, -1.0), glm::vec2(1.0, 0.0),
+            glm::vec2(-1.0, 1.0), glm::vec2(0.0, 1.0),
+            glm::vec2(1.0, 1.0), glm::vec2(1.0, 1.0),
+        };
+        const std::array<uint32_t, 6> quad_indices_array = {
+            0, 1, 2, 2, 1, 3
+        };
+        std::array<opengl::ShaderDataType, 2> quad_buffer_layout_array = {
+            opengl::ShaderDataType::Vec2, opengl::ShaderDataType::Vec2,
+        };
+        opengl::BufferLayout quad_buffer_layout(quad_buffer_layout_array.data(), quad_buffer_layout_array.size());
+
+        quad_vertices = std::make_shared<opengl::VertexBuffer>(
+            quad_vertices_array.data(),
+            quad_vertices_array.size() * sizeof(quad_vertices_array[0])
+        );
+        quad_indices = std::make_shared<opengl::IndexBuffer>(
+            quad_indices_array.data(),
+            quad_indices_array.size()
+        );
+        quad_vao = std::make_shared<opengl::VertexArrayBuffer>();
+        quad_vao->add_index_buffer(quad_indices);
+        quad_vao->add_vertex_buffer(quad_vertices, quad_buffer_layout);
+
+        screen_material = Material(SCREEN_VERTEX_SHADER, SCREEN_FRAGMENT_SHADER);
+        ASSERT_FATAL_ERROR(screen_material.is_valid(), "The screen material is invalid: " << screen_material.get_errors());
+        { // Setup material uniforms
+            Framebuffer *gbuffer = gbuffer_ref.get_mut<Framebuffer>();
+            screen_material.set_uniform("u_position", gbuffer->get_attachment(0));
+            screen_material.set_uniform("u_color", gbuffer->get_attachment(1));
+            screen_material.set_uniform("u_normal", gbuffer->get_attachment(2));
+        }
+
 
         // Create renderer systems
         p_world.system<Renderer>("Start Frame")
@@ -127,8 +215,15 @@ namespace lixy {
                 glViewport(0, 0, width, height); // FIXME: resize when there is a resize event
 
                 // Clear screen
-                glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+                // Set the current framebuffer to the gbuffer, resize it and clear it
+                Framebuffer *gbuffer = rd.gbuffer_ref.get_mut<Framebuffer>();
+                gbuffer->bind();
+                // rd.gbuffer.set_size(width, height);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             });
 
         p_world.system<Renderer>("Calculate Camera Transform")
@@ -176,10 +271,17 @@ namespace lixy {
                 }
             });
         
-        p_world.system<Renderer>("Swap Buffers")
+        p_world.system<Renderer>("End Frame")
             .term_at(0).singleton()
             .kind(flecs::OnStore)
             .each([](Renderer &rd) {
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+                rd.screen_material.bind_material();
+                rd.quad_vao->bind();
+                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+                rd.quad_vao->unbind();
+
                 rd.context.swap_buffers();
             });
     }

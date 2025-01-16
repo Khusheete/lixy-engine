@@ -25,6 +25,9 @@
 
 namespace lixy::opengl {
 
+    class Framebuffer;
+
+
     enum class TextureFormat {
         R8, RG8, RGB8, RGBA8,
         R16, RG16, RGB16, RGBA16
@@ -36,6 +39,7 @@ namespace lixy::opengl {
         virtual void bind(uint32_t p_location = 0) const = 0;
         virtual void unbind() const = 0;
         virtual bool is_valid() const = 0;
+        virtual uint32_t get_texture_id() const = 0;
     };
 
 
@@ -44,7 +48,10 @@ namespace lixy::opengl {
         virtual void bind(uint32_t p_location = 0) const override;
         virtual void unbind() const override;
 
-        bool is_valid() const override;
+        virtual bool is_valid() const override;
+        virtual uint32_t get_texture_id() const override;
+
+        void resize(uint32_t p_width, uint32_t p_height);
 
         static Texture2D load(const std::string &p_path);
 
@@ -61,5 +68,10 @@ namespace lixy::opengl {
     private:
         uint32_t texture_id;
         bool valid = false;
+
+        TextureFormat format;
+        uint32_t width, height;
+
+        friend Framebuffer;
     };
 }

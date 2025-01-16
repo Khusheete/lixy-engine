@@ -16,44 +16,40 @@
 */
 
 
-#include "texture.hpp"
+#pragma once
+
+
 #include "core/src/ref.hpp"
-#include "renderer/src/primitives/texture.hpp"
 #include "thirdparty/flecs/flecs.h"
-#include <string>
+#include "primitives/framebuffer.hpp"
+#include "primitives/texture.hpp"
 
 
 namespace lixy {
 
-    void Texture::bind(int p_location) const {
-        internal_texture->bind(p_location);
-    }
-    
-    
-    void Texture::unbind() const {
-        internal_texture->unbind();
-    }
 
+    class Framebuffer {
+    public:
+        void bind() const;
+        void unbind() const;
 
-    bool Texture::is_valid() const {
-        return internal_texture->is_valid();
-    }
+        bool is_complete() const;
 
+        inline uint32_t get_width() const { return framebuffer.get_width(); };
+        inline uint32_t get_height() const { return framebuffer.get_height(); };
+        void set_size(uint32_t p_width, uint32_t p_height);
 
-    uint32_t Texture::get_texture_id() const {
-        return internal_texture->get_texture_id();
-    }
+        inline int get_attachment_count() { return texture_attachments.size(); };
+        EntityRef get_attachment(int p_index);
 
-    EntityRef Texture::create_texture2d(flecs::world &p_world, int p_width, int p_height, opengl::TextureFormat p_format) {
-        EntityRef texture = EntityRef::create_reference(p_world).add<Texture>();
-        texture.get_mut<Texture>()->internal_texture = std::make_unique<opengl::Texture2D>(opengl::Texture2D(p_width, p_height, p_format));
-        return texture;
-    }
-    
-    
-    EntityRef Texture::load_texture2d(flecs::world &p_world, const std::string &p_path) {
-        EntityRef texture = EntityRef::create_reference(p_world).add<Texture>();
-        texture.get_mut<Texture>()->internal_texture = std::make_unique<opengl::Texture2D>(opengl::Texture2D::load(p_path));
-        return texture;
-    }
+        static EntityRef create(flecs::world &p_world, uint32_t p_width, uint32_t p_height, const std::vector<opengl::TextureFormat> &p_texture_attachment_formats);
+
+        Framebuffer() = default;
+        Framebuffer(Framebuffer&&) = default;
+        Framebuffer &operator=(Framebuffer&&) = default;
+        virtual ~Framebuffer() = default;
+    private:
+        opengl::Framebuffer framebuffer;
+        std::vector<EntityRef> texture_attachments;
+    };
 }

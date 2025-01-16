@@ -19,6 +19,7 @@
 #include "module.hpp"
 
 #include "core/src/module.hpp"
+#include "renderer/src/framebuffer.hpp"
 #include "renderer/src/material.hpp"
 #include "renderer/src/mesh.hpp"
 #include "renderer/src/renderer.hpp"
@@ -40,6 +41,7 @@ namespace lixy {
         p_world.add<Texture>();
         p_world.add<MeshInstance>();
         p_world.add<Visible>();
+        p_world.add<Framebuffer>();
 
         // Initialize renderer singleton
         p_world.add<Renderer>();

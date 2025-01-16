@@ -22,9 +22,13 @@
 #include "core/src/ref.hpp"
 #include "primitives/context.hpp"
 
+#include "renderer/src/framebuffer.hpp"
 #include "renderer/src/material.hpp"
+#include "renderer/src/primitives/framebuffer.hpp"
+#include "renderer/src/primitives/vbuffer.hpp"
 #include "thirdparty/flecs/flecs.h"
 #include "thirdparty/glm/glm.hpp"
+#include <memory>
 
 
 namespace lixy {
@@ -60,11 +64,17 @@ namespace lixy {
     
     private:
         opengl::OpenGLContext context;
+        EntityRef gbuffer_ref;
         
         flecs::entity current_camera = flecs::entity::null();
         glm::mat4 projection_matrix = glm::mat4(1.0);
         glm::mat4 view_matrix = glm::mat4(1.0);
 
         Material default_material;
+        
+        Material screen_material;
+        std::shared_ptr<opengl::VertexBuffer> quad_vertices;
+        std::shared_ptr<opengl::IndexBuffer> quad_indices;
+        std::shared_ptr<opengl::VertexArrayBuffer> quad_vao;
     };
 }

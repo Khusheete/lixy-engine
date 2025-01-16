@@ -45,6 +45,24 @@ namespace lixy::opengl {
     }
 
 
+    uint32_t Texture2D::get_texture_id() const {
+        return texture_id;
+    }
+
+
+    void Texture2D::resize(uint32_t p_width, uint32_t p_height) {
+        uint32_t internal_format, gl_format;
+        Texture2D::get_opengl_format(format, &internal_format, &gl_format);
+
+        bind();
+        glTexImage2D(GL_TEXTURE_2D, 0, internal_format, p_width, p_height, 0, gl_format, GL_UNSIGNED_BYTE, nullptr);
+        unbind();
+
+        width = p_width;
+        height = p_height;
+    }
+
+
     Texture2D Texture2D::load(const std::string &p_path) {
         int width, height, channel_count;
         stbi_set_flip_vertically_on_load(1);
@@ -79,31 +97,39 @@ namespace lixy::opengl {
     }
 
 
-    Texture2D::Texture2D(int p_width, int p_height, TextureFormat p_format) {
+    Texture2D::Texture2D(int p_width, int p_height, TextureFormat p_format)
+        : format(p_format),
+        width(p_width),
+        height(p_height)
+    {
         glGenTextures(1, &texture_id);
 
-        uint32_t internal_format, format;
-        Texture2D::get_opengl_format(p_format, &internal_format, &format);
+        uint32_t internal_format, gl_format;
+        Texture2D::get_opengl_format(p_format, &internal_format, &gl_format);
 
         bind();
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, internal_format, p_width, p_height, 0, format, GL_UNSIGNED_BYTE, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, internal_format, p_width, p_height, 0, gl_format, GL_UNSIGNED_BYTE, nullptr);
 
         unbind();
         valid = true;
     }
 
 
-    Texture2D::Texture2D(const void *p_data, int p_width, int p_height, TextureFormat p_format) {
+    Texture2D::Texture2D(const void *p_data, int p_width, int p_height, TextureFormat p_format)
+        : format(p_format),
+        width(p_width),
+        height(p_height)
+    {
         glGenTextures(1, &texture_id);
 
-        uint32_t internal_format, format;
-        Texture2D::get_opengl_format(p_format, &internal_format, &format);
+        uint32_t internal_format, gl_format;
+        Texture2D::get_opengl_format(p_format, &internal_format, &gl_format);
 
         bind();
 
@@ -112,7 +138,7 @@ namespace lixy::opengl {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, internal_format, p_width, p_height, 0, format, GL_UNSIGNED_BYTE, p_data);
+        glTexImage2D(GL_TEXTURE_2D, 0, internal_format, p_width, p_height, 0, gl_format, GL_UNSIGNED_BYTE, p_data);
 
         unbind();
         valid = true;
@@ -121,7 +147,10 @@ namespace lixy::opengl {
 
     Texture2D::Texture2D(Texture2D &&p_other)
         : texture_id(p_other.texture_id),
-        valid(p_other.valid)
+        valid(p_other.valid),
+        format(p_other.format),
+        width(p_other.width),
+        height(p_other.height)
     {
         p_other.texture_id = 0;
         p_other.valid = false;
@@ -135,6 +164,9 @@ namespace lixy::opengl {
 
         texture_id = p_other.texture_id;
         valid = p_other.valid;
+        format = p_other.format;
+        width = p_other.width;
+        height = p_other.height;
 
         p_other.texture_id = 0;
         p_other.valid = 0;

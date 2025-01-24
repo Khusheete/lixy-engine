@@ -145,7 +145,9 @@ namespace lixy::opengl {
     }
 
 
-    VertexArrayBuffer::VertexArrayBuffer() {
+    VertexArrayBuffer::VertexArrayBuffer()
+        : vertex_attrib_count(0)
+    {
         glGenVertexArrays(1, &array_index);
     }
 
@@ -153,7 +155,8 @@ namespace lixy::opengl {
     VertexArrayBuffer::VertexArrayBuffer(VertexArrayBuffer &&p_other)
         : array_index(p_other.array_index),
         vertex_buffers(p_other.vertex_buffers),
-        index_buffers(p_other.index_buffers)
+        index_buffers(p_other.index_buffers),
+        vertex_attrib_count(p_other.vertex_attrib_count)
     {
         p_other.array_index = 0;
     }
@@ -165,6 +168,7 @@ namespace lixy::opengl {
         }
 
         array_index = p_other.array_index;
+        vertex_attrib_count = p_other.vertex_attrib_count;
         vertex_buffers = std::move(p_other.vertex_buffers);
         index_buffers = std::move(p_other.index_buffers);
 

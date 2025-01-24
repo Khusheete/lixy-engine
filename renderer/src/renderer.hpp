@@ -59,7 +59,7 @@ namespace lixy {
         Renderer() = default;
         
     private:
-        void _initialize(flecs::world &p_world);
+        void _initialize(flecs::world &p_world, flecs::entity &p_self);
         friend RendererModule;
     
     private:

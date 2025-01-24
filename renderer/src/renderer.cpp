@@ -147,7 +147,7 @@ namespace lixy {
     }
 
 
-    void Renderer::_initialize(flecs::world &p_world) {
+    void Renderer::_initialize(flecs::world &p_world, flecs::entity &p_self) {
         // Create opengl context
         context.initialize();
 
@@ -159,7 +159,8 @@ namespace lixy {
         };
         int width, height; // FIXME: width and height should be managed inside the windowing system
         glfwGetFramebufferSize(context.get_window(), &width, &height);
-        gbuffer_ref = Framebuffer::create(p_world, width, height, g_framebuffer_formats);
+        gbuffer_ref = Framebuffer::create(p_world, width, height, g_framebuffer_formats)
+            .add(flecs::ChildOf, p_self);
         ASSERT_FATAL_ERROR(gbuffer_ref.get<Framebuffer>()->is_complete(), "Incomplete GBuffer");
 
         // Create materials

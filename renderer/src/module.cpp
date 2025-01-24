@@ -44,8 +44,8 @@ namespace lixy {
         p_world.add<Framebuffer>();
 
         // Initialize renderer singleton
-        p_world.add<Renderer>();
+        flecs::entity rd = p_world.entity<Renderer>();
         p_world.set<Renderer>(Renderer());
-        p_world.get_mut<Renderer>()->_initialize(p_world);
+        p_world.get_mut<Renderer>()->_initialize(p_world, rd);
     }
 }

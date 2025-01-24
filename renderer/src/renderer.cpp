@@ -225,7 +225,7 @@ namespace lixy {
                 // Set the current framebuffer to the gbuffer, resize it and clear it
                 Framebuffer *gbuffer = rd.gbuffer_ref.get_mut<Framebuffer>();
                 gbuffer->bind();
-                // rd.gbuffer.set_size(width, height);
+                gbuffer->set_size(width, height);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             });
 

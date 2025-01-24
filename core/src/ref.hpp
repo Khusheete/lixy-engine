@@ -71,6 +71,7 @@ namespace lixy {
         }
 
         bool is_alive() const;
+        void drop();
 
         static EntityRef create_reference(flecs::world &p_world);
 

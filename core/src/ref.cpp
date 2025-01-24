@@ -42,7 +42,18 @@ namespace lixy {
     }
 
 
-    // EntityRef::EntityRef() {}
+    void EntityRef::drop() {
+        if (reference.is_alive()) {
+            RefCounted *ref_count = reference.get_mut<RefCounted>();
+            ref_count->reference_count -= 1;
+
+            if (ref_count->reference_count == 0) {
+                reference.destruct();
+            }
+        }
+
+        reference = flecs::entity::null();
+    }
 
 
     EntityRef::EntityRef(const EntityRef &p_other)
@@ -67,9 +78,10 @@ namespace lixy {
     }
 
 
-    EntityRef::EntityRef(EntityRef &&p_other)
-        : reference(p_other.reference)
-    {
+    EntityRef::EntityRef(EntityRef &&p_other) {
+        drop();
+
+        reference = p_other.reference;
         if (reference.is_alive()) {
             reference.get_mut<RefCounted>()->reference_count += 1;
         }
@@ -77,9 +89,7 @@ namespace lixy {
 
 
     EntityRef &EntityRef::operator=(EntityRef &&p_other) {
-        if (reference.is_alive()) {
-            reference.get_mut<RefCounted>()->reference_count -= 1;
-        }
+        drop();
 
         reference = p_other.reference;
         if (reference.is_alive()) {
@@ -96,13 +106,6 @@ namespace lixy {
     }
 
     EntityRef::~EntityRef() {
-        if (!reference.is_alive()) return;
-
-        RefCounted *ref_count = reference.get_mut<RefCounted>();
-        ref_count->reference_count -= 1;
-
-        if (ref_count->reference_count == 0) {
-            reference.destruct();
-        }
+        if (reference.is_alive()) drop();
     }
 }

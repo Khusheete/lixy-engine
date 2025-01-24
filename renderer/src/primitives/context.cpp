@@ -31,13 +31,31 @@ namespace lixy::opengl {
             ASSERT_FATAL_ERROR(glfwInit(), "Could not initialize glfw");
         }
 
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
         window = glfwCreateWindow(800, 600, "", nullptr, nullptr);
         ASSERT_FATAL_ERROR(window, "Could not create window");
         glfwMakeContextCurrent(window);
+
+        int context_flags;
+        glGetIntegerv(GL_CONTEXT_FLAGS, &context_flags);
+
+        // Add debug context
+        if (context_flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
+            // Load the relevent opengl functions
+            glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC)glfwGetProcAddress("glDebugMessageCallback");
+            glDebugMessageControl = (PFNGLDEBUGMESSAGECONTROLPROC)glfwGetProcAddress("glDebugMessageCallback");
+
+            glEnable(GL_DEBUG_OUTPUT);
+            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+            glDebugMessageCallback(&OpenGLContext::_gl_debug_context, nullptr);
+            glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+        } else {
+            LOG_WARNING("Could not set an OpenGL debug context");
+        }
 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
@@ -50,6 +68,63 @@ namespace lixy::opengl {
 
         instance_count += 1;
     }
+
+
+    void APIENTRY OpenGLContext::_gl_debug_context(GLenum p_source, GLenum p_type, GLuint p_id, GLenum p_severity, GLsizei p_length, const char *p_message, const void *p_user_param) {
+        // ignore non-significant error/warning codes
+        if(p_id == 131169 || p_id == 131185 || p_id == 131218 || p_id == 131204) return; // TODO: check
+
+        std::string_view message_color;
+
+        switch (p_type) {
+            case GL_DEBUG_TYPE_ERROR:
+                message_color = CSI_RED;
+                std::cout << CSI_RED << "OpenGL Error: "; break;
+            case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+                message_color = CSI_YELLOW;
+                std::cout << CSI_YELLOW << "OpenGL Warning - Deprecated Behaviour: "; break;
+            case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+                message_color = CSI_YELLOW;
+                std::cout << CSI_YELLOW << "OpenGL Warning - Undefined Behaviour: "; break; 
+            case GL_DEBUG_TYPE_PORTABILITY:
+                message_color = CSI_YELLOW;
+                std::cout << CSI_YELLOW << "OpenGL Warning - Portability: "; break;
+            case GL_DEBUG_TYPE_PERFORMANCE:
+                message_color = CSI_YELLOW;
+                std::cout << CSI_YELLOW << "OpenGL Warning - Performance: "; break;
+            case GL_DEBUG_TYPE_MARKER:
+                message_color = CSI_YELLOW;
+                std::cout << CSI_YELLOW << "OpenGL Warning - Marker: "; break;
+            case GL_DEBUG_TYPE_PUSH_GROUP:
+                message_color = CSI_YELLOW;
+                std::cout << CSI_YELLOW << "OpenGL Warning - Push Group: "; break;
+            case GL_DEBUG_TYPE_POP_GROUP:
+                message_color = CSI_YELLOW;
+                std::cout << CSI_YELLOW << "OpenGL Warning - Pop Group: "; break;
+            case GL_DEBUG_TYPE_OTHER:
+                message_color = CSI_YELLOW;
+                std::cout << CSI_YELLOW << "OpenGL Warning - Other: "; break;
+        }
+
+        switch (p_severity) {
+            case GL_DEBUG_SEVERITY_HIGH:         std::cout << CSI_BOLD << "Severity: high; " << CSI_CLEAR << message_color; break;
+            case GL_DEBUG_SEVERITY_MEDIUM:       std::cout << "Severity: medium; "; break;
+            case GL_DEBUG_SEVERITY_LOW:          std::cout << "Severity: low; "; break;
+            case GL_DEBUG_SEVERITY_NOTIFICATION: std::cout << "Severity: notification; "; break;
+        }
+
+        switch (p_source) {
+            case GL_DEBUG_SOURCE_API:             std::cout << "Source: API; "; break;
+            case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   std::cout << "Source: Window System; "; break;
+            case GL_DEBUG_SOURCE_SHADER_COMPILER: std::cout << "Source: Shader Compiler; "; break;
+            case GL_DEBUG_SOURCE_THIRD_PARTY:     std::cout << "Source: Third Party; "; break;
+            case GL_DEBUG_SOURCE_APPLICATION:     std::cout << "Source: Application; "; break;
+            case GL_DEBUG_SOURCE_OTHER:           std::cout << "Source: Other; "; break;
+        }
+
+        std::cout << "Debug message (" << p_id << "):\n" <<  p_message << CSI_CLEAR << std::endl;
+    }
+
 
 
     void OpenGLContext::set_current() {

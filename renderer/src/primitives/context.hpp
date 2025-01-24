@@ -49,6 +49,9 @@ namespace lixy::opengl {
         virtual ~OpenGLContext();
 
     private:
+        static void _gl_debug_context(GLenum p_source, GLenum p_type, GLuint p_id, GLenum p_severity, GLsizei p_length, const char *p_message, const void *p_user_param);
+
+    private:
         static int instance_count;
 
         GLFWwindow *window = nullptr;

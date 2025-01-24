@@ -65,8 +65,8 @@ DemoApplication::DemoApplication() {
     renderer->window_set_title("Demo OpenGL Application");
 
     // Load image
-    lixy::EntityRef texture = lixy::Texture::load_texture2d(world, "assets/textures/test.png");
-    ASSERT_FATAL_ERROR(texture.get<lixy::Texture>()->is_valid(), "Image not valid");
+    // lixy::EntityRef texture = lixy::Texture::load_texture2d(world, "assets/textures/test.png");
+    // ASSERT_FATAL_ERROR(texture.get<lixy::Texture>()->is_valid(), "Image not valid");
 
     // Create material
     // lixy::EntityRef material = lixy::Material::load(world, "assets/shaders/shader.vert", "assets/shaders/shader.frag");

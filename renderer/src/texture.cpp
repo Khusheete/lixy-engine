@@ -56,4 +56,14 @@ namespace lixy {
         texture.get_mut<Texture>()->internal_texture = std::make_unique<opengl::Texture2D>(opengl::Texture2D::load(p_path));
         return texture;
     }
+
+    
+    opengl::BaseTexture *Texture::get_internal_texture() {
+        return internal_texture.get();
+    }
+    
+    
+    const opengl::BaseTexture *Texture::get_internal_texture() const {
+        return internal_texture.get();
+    }
 }

@@ -44,6 +44,9 @@ namespace lixy {
         Texture(Texture&&) = default;
         Texture &operator=(Texture&&) = default;
         virtual ~Texture() = default;
+
+        opengl::BaseTexture *get_internal_texture();
+        const opengl::BaseTexture *get_internal_texture() const;
     
     private:
         std::unique_ptr<opengl::BaseTexture> internal_texture;

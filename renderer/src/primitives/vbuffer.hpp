@@ -18,10 +18,9 @@
 
 #pragma once
 
-#include "debug/debug.hpp"
 #include "shader.hpp"
 #include "thirdparty/glm/fwd.hpp"
-#include <GL/glew.h>
+#include "thirdparty/glad/include/glad/glad.h"
 
 #include <cstdint>
 #include <vector>

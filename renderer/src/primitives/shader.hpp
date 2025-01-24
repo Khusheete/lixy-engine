@@ -21,7 +21,7 @@
 #include "debug/debug.hpp"
 #include "thirdparty/glm/glm.hpp"
 
-#include <GL/glew.h>
+#include "thirdparty/glad/include/glad/glad.h"
 
 #include <cstdint>
 #include <string>

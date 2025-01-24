@@ -51,5 +51,7 @@ namespace lixy {
     private:
         opengl::Framebuffer framebuffer;
         std::vector<EntityRef> texture_attachments;
+
+        uint32_t width, height;
     };
 }

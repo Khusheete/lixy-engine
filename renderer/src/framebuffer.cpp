@@ -42,7 +42,17 @@ namespace lixy {
 
 
     void Framebuffer::set_size(uint32_t p_width, uint32_t p_height) {
-        return framebuffer.set_size(p_width, p_height);
+        if (width == p_width || height == p_height) return;
+
+        for (int i = 0; i < texture_attachments.size(); i++) {
+            Texture *attachment = texture_attachments[i].get_mut<Texture>();
+            ((opengl::Texture2D*)attachment->get_internal_texture())->resize(p_width, p_height);
+        }
+
+        framebuffer.set_size(p_width, p_height);
+
+        width = p_width;
+        height = p_height;
     }
 
 
@@ -72,6 +82,9 @@ namespace lixy {
 
         // Create framebuffer object
         fb->framebuffer = opengl::Framebuffer(p_width, p_height, texture_ids);
+
+        fb->width = p_width;
+        fb->height = p_height;
 
         return fb_ref;
     }

@@ -22,7 +22,7 @@
 
 #include "thirdparty/stb/stb_image.h"
 
-#include <GL/glew.h>
+#include "thirdparty/glad/include/glad/glad.h"
 
 
 namespace lixy::opengl {

@@ -17,11 +17,11 @@
 
 
 #include "vbuffer.hpp"
-
 #include "shader.hpp"
 
+#include "thirdparty/glad/include/glad/glad.h"
+
 #include <cstdint>
-#include <GL/glew.h>
 
 
 namespace lixy::opengl {

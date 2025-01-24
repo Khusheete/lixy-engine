@@ -40,15 +40,21 @@ namespace lixy::opengl {
         ASSERT_FATAL_ERROR(window, "Could not create window");
         glfwMakeContextCurrent(window);
 
+        // Load OpenGL functions
+        if (instance_count == 0) {
+            ASSERT_FATAL_ERROR(gladLoadGLLoader((GLADloadproc)glfwGetProcAddress), "Could not initialize glad");
+        }
+
+        // Print opengl context information
+        const uint8_t *opengl_version_info = glGetString(GL_VERSION);
+        const uint8_t *hardware_info = glGetString(GL_RENDERER);
+        std::cout << "OpenGL API " << opengl_version_info << " - Using: " << hardware_info << std::endl;
+
         int context_flags;
         glGetIntegerv(GL_CONTEXT_FLAGS, &context_flags);
 
         // Add debug context
         if (context_flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
-            // Load the relevent opengl functions
-            glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC)glfwGetProcAddress("glDebugMessageCallback");
-            glDebugMessageControl = (PFNGLDEBUGMESSAGECONTROLPROC)glfwGetProcAddress("glDebugMessageCallback");
-
             glEnable(GL_DEBUG_OUTPUT);
             glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
             glDebugMessageCallback(&OpenGLContext::_gl_debug_context, nullptr);
@@ -61,10 +67,6 @@ namespace lixy::opengl {
         glEnable(GL_BLEND);
 
         glEnable(GL_DEPTH_TEST);
-
-        if (instance_count == 0) {
-            ASSERT_FATAL_ERROR(glewInit() == GLEW_OK, "Could not initialize glew");
-        }
 
         instance_count += 1;
     }

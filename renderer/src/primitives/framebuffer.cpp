@@ -119,7 +119,9 @@ namespace lixy::opengl {
 
 
     void RenderBufferObject::set_size(int32_t p_width, int32_t p_height) {
-        glNamedRenderbufferStorage(buffer_id, get_internal_format(), p_width, p_height);
+        bind();
+        glRenderbufferStorage(GL_RENDERBUFFER, get_internal_format(), p_width, p_height);
+        unbind();
     }
 
 

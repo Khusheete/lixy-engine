@@ -23,7 +23,6 @@
 #include "thirdparty/glm/glm.hpp"
 
 #include <algorithm>
-#include <asm-generic/errno-base.h>
 #include <sstream>
 #include <vector>
 

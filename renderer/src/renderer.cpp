@@ -246,12 +246,12 @@ namespace lixy {
                 case Camera::Type::PERSPECTIVE:
                 {
                     float aspect_ratio = (float) width / height;
-                    rd.projection_matrix = glm::perspective(camera->fov, aspect_ratio, camera->near, camera->far);
+                    rd.projection_matrix = glm::perspective(camera->fov, aspect_ratio, camera->clip_near, camera->clip_far);
                     break;
                 }
                 case Camera::Type::ORTHOGRAPHIC:
                 {
-                    rd.projection_matrix = glm::ortho(-0.5f * width, 0.5f * width, -0.5f * height, 0.5f * height, camera->near, camera->far);
+                    rd.projection_matrix = glm::ortho(-0.5f * width, 0.5f * width, -0.5f * height, 0.5f * height, camera->clip_near, camera->clip_far);
                     break;
                 }
                 }

@@ -23,6 +23,7 @@ function build_config()
     filter "platforms:linux"
         system "linux"
         toolset "gcc"
+        defines { "LIXY_LINUX" }
     
     filter "platforms:windows"
         system "windows"
@@ -32,6 +33,8 @@ function build_config()
         elseif syshost == "Nt" then
             toolset "msc"
         end
+        buildoptions { "-static", "-static-libgcc", "-static-libstdc++" }
+        defines { "LIXY_WINDOWS" }
     
     filter "configurations:debug"
         symbols "Full"

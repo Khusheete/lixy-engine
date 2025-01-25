@@ -17,4 +17,6 @@ project "Demo"
 
     filter "platforms:linux"
         links { "GL", "X11", "Xrandr", "pthread", "dl" }
+    filter "platforms:windows"
+        links { "opengl32", "gdi32", "ws2_32" }
     filter ""

@@ -33,8 +33,8 @@ namespace lixy {
         };
 
     public:
-        float near = 0.1;
-        float far = 1000.0;
+        float clip_near = 0.1;
+        float clip_far = 1000.0;
         float fov = glm::half_pi<float>();
         float focal_length = 1.0;
         Type type = Type::PERSPECTIVE;

@@ -20,6 +20,7 @@
 #include "core/src/ref.hpp"
 #include "renderer/src/primitives/texture.hpp"
 #include "thirdparty/flecs/flecs.h"
+#include <filesystem>
 #include <string>
 
 
@@ -51,7 +52,7 @@ namespace lixy {
     }
     
     
-    EntityRef Texture::load_texture2d(flecs::world &p_world, const std::string &p_path) {
+    EntityRef Texture::load_texture2d(flecs::world &p_world, const std::filesystem::path &p_path) {
         EntityRef texture = EntityRef::create_reference(p_world).add<Texture>();
         texture.get_mut<Texture>()->internal_texture = std::make_unique<opengl::Texture2D>(opengl::Texture2D::load(p_path));
         return texture;

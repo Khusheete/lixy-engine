@@ -23,6 +23,7 @@
 #include "renderer/src/primitives/texture.hpp"
 #include "thirdparty/flecs/flecs.h"
 
+#include <filesystem>
 #include <memory>
 #include <string>
 
@@ -37,7 +38,7 @@ namespace lixy {
         bool is_valid() const;
         uint32_t get_texture_id() const;
 
-        static EntityRef load_texture2d(flecs::world &p_world, const std::string &p_path);
+        static EntityRef load_texture2d(flecs::world &p_world, const std::filesystem::path &p_path);
         static EntityRef create_texture2d(flecs::world &p_world, int p_width, int p_height, opengl::TextureFormat p_format);
 
         Texture() = default;

@@ -20,6 +20,7 @@
 
 
 #include <cstdint>
+#include <filesystem>
 #include <string>
 
 
@@ -53,7 +54,7 @@ namespace lixy::opengl {
 
         void resize(uint32_t p_width, uint32_t p_height);
 
-        static Texture2D load(const std::string &p_path);
+        static Texture2D load(const std::filesystem::path &p_path);
 
         Texture2D() = default;
         Texture2D(int p_width, int p_height, TextureFormat p_format);

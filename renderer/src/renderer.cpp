@@ -33,7 +33,7 @@
 #include "thirdparty/flecs/flecs.h"
 #include "thirdparty/glm/ext/matrix_clip_space.hpp"
 #include "thirdparty/glm/matrix.hpp"
-#include "thirdparty/rgfw/include.hpp"
+#include "windowing/src/window.hpp"
 
 #include <array>
 #include <memory>
@@ -114,16 +114,6 @@ namespace lixy {
         "}";
 
 
-    void Renderer::window_set_title(const std::string &p_title) {
-        context.window_set_title(p_title);
-    }
-        
-        
-    bool Renderer::window_should_close() {
-        return context.window_should_close();
-    }
-
-
     void Renderer::set_current_camera(flecs::entity p_camera) {
         ASSERT_FATAL_ERROR(p_camera.has<Camera>(), "The provided entity is not a camera");
         ASSERT_FATAL_ERROR(p_camera.has<Transform>(), "The provided camera has no transform component");
@@ -149,18 +139,21 @@ namespace lixy {
 
     void Renderer::_initialize(flecs::world &p_world, flecs::entity &p_self) {
         // Create opengl context
-        context.initialize();
+        context.initialize(&Window::get_proc_address);
 
         // Create gbuffer
-        std::vector<opengl::TextureFormat> g_framebuffer_formats = {
-            opengl::TextureFormat::RGBA8, // Position
-            opengl::TextureFormat::RGBA8, // Albedo
-            opengl::TextureFormat::RGBA8, // Normal
-        };
-        int width = context.window_get_width(), height = context.window_get_height(); // FIXME: width and height should be managed inside the windowing system
-        gbuffer_ref = Framebuffer::create(p_world, width, height, g_framebuffer_formats)
-            .add(flecs::ChildOf, p_self);
-        ASSERT_FATAL_ERROR(gbuffer_ref.get<Framebuffer>()->is_complete(), "Incomplete GBuffer");
+        {
+            std::vector<opengl::TextureFormat> g_framebuffer_formats = {
+                opengl::TextureFormat::RGBA8, // Position
+                opengl::TextureFormat::RGBA8, // Albedo
+                opengl::TextureFormat::RGBA8, // Normal
+            };
+            Window *window = p_world.get_mut<Window>();
+            int width = window->get_width(), height = window->get_height();
+            gbuffer_ref = Framebuffer::create(p_world, width, height, g_framebuffer_formats)
+                .add(flecs::ChildOf, p_self);
+            ASSERT_FATAL_ERROR(gbuffer_ref.get<Framebuffer>()->is_complete(), "Incomplete GBuffer");
+        }
 
         // Create materials
         default_material = Material(DEFAULT_VERTEX_SHADER, DEFAULT_FRAGMENT_SHADER);
@@ -204,15 +197,16 @@ namespace lixy {
 
 
         // Create renderer systems
-        p_world.system<Renderer>("Start Frame")
+        p_world.system<Renderer, Window>("Start Frame")
             .term_at(0).singleton()
+            .term_at(1).singleton()
             .kind(flecs::PreUpdate)
-            .each([](Renderer &rd) {
-                rd.context.set_current();
-                rd.context.window_poll_events();
+            .each([](Renderer &rd, Window &window) {
+                window.set_as_current_context();
+                window.poll_events();
 
                 // Set viewport size
-                int width = rd.context.window_get_width(), height = rd.context.window_get_height(); // FIXME: width and height should be managed inside the windowing system
+                int width = window.get_width(), height = window.get_height();
                 glViewport(0, 0, width, height); // FIXME: resize when there is a resize event
 
                 // Clear screen
@@ -227,16 +221,17 @@ namespace lixy {
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             });
 
-        p_world.system<Renderer>("Calculate Camera Transform")
+        p_world.system<Renderer, Window>("Calculate Camera Transform")
             .term_at(0).singleton()
+            .term_at(1).singleton()
             .kind(flecs::PostUpdate)
-            .each([](Renderer &rd) {
+            .each([](Renderer &rd, Window &window) {
                 if (!rd.current_camera.is_alive()) return;
 
                 const Camera *camera = rd.current_camera.get<Camera>();
                 Transform *camera_transform = rd.current_camera.get_mut<Transform>();
 
-                int width = rd.context.window_get_width(), height = rd.context.window_get_height();
+                int width = window.get_width(), height = window.get_height();
 
                 // Calculate view matrix transform
                 rd.view_matrix = glm::inverse(camera_transform->get_matrix());
@@ -271,10 +266,11 @@ namespace lixy {
                 }
             });
         
-        p_world.system<Renderer>("End Frame")
+        p_world.system<Renderer, Window>("End Frame")
             .term_at(0).singleton()
+            .term_at(1).singleton()
             .kind(flecs::OnStore)
-            .each([](Renderer &rd) {
+            .each([](Renderer &rd, Window &window) {
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
                 rd.screen_material.bind_material();
@@ -282,7 +278,7 @@ namespace lixy {
                 glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
                 rd.quad_vao->unbind();
 
-                rd.context.swap_buffers();
+                window.swap_buffers();
             });
     }
 }

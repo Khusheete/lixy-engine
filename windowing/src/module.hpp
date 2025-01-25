@@ -19,35 +19,12 @@
 #pragma once
 
 
-#include <functional>
-#include <string>
-
-#include "thirdparty/glad/include/glad/glad.h"
-#include <GL/gl.h>
-#include <GL/glext.h>
+#include "thirdparty/flecs/flecs.h"
 
 
-namespace lixy::opengl {
-    typedef void(*ProcAddress);
-    typedef ProcAddress(GetProcAddress(const char*));
+namespace lixy {
 
-
-    class OpenGLContext {
-    public:
-        void initialize(GetProcAddress get_proc_address);
-
-        OpenGLContext() = default;
-        OpenGLContext(const OpenGLContext&) = delete;
-        OpenGLContext(OpenGLContext &&p_other);
-        OpenGLContext &operator=(OpenGLContext &&p_other);
-        virtual ~OpenGLContext();
-
-    private:
-        static void _gl_debug_context(GLenum p_source, GLenum p_type, GLuint p_id, GLenum p_severity, GLsizei p_length, const char *p_message, const void *p_user_param);
-
-    private:
-        static int instance_count;
-
-        bool initialized = false;
+    struct WindowingModule {
+        WindowingModule(flecs::world &p_world);
     };
 }

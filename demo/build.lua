@@ -4,7 +4,7 @@ project "Demo"
     cppdialect "c++17"
     
     files { "src/**.hpp", "src/**.cpp" }
-    links { "Renderer", "Flecs", "Stb", "Core", "WavefrontLoader", "rgfw", "glad" }
+    links { "Renderer", "Windowing", "Flecs", "Stb", "Core", "WavefrontLoader", "rgfw", "glad" }
 
     build_target_dir()
     build_object_dir()

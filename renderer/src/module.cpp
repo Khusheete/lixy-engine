@@ -26,6 +26,7 @@
 
 #include "renderer/src/texture.hpp"
 #include "thirdparty/flecs/flecs.h"
+#include "windowing/src/module.hpp"
 
 
 namespace lixy {
@@ -33,6 +34,7 @@ namespace lixy {
     RendererModule::RendererModule(flecs::world &p_world) {
         p_world.module<RendererModule>();
         p_world.import<CoreModule>();
+        p_world.import<WindowingModule>();
 
         // Add components
         p_world.add<ArrayMesh>();

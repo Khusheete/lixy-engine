@@ -16,38 +16,23 @@
 */
 
 
-#pragma once
+#include "module.hpp"
 
 
-#include <functional>
-#include <string>
+#include "window.hpp"
 
-#include "thirdparty/glad/include/glad/glad.h"
-#include <GL/gl.h>
-#include <GL/glext.h>
+#include "core/src/module.hpp"
+#include "thirdparty/flecs/flecs.h"
 
 
-namespace lixy::opengl {
-    typedef void(*ProcAddress);
-    typedef ProcAddress(GetProcAddress(const char*));
+namespace lixy {
 
 
-    class OpenGLContext {
-    public:
-        void initialize(GetProcAddress get_proc_address);
+    WindowingModule::WindowingModule(flecs::world &p_world) {
+        p_world.module<WindowingModule>();
+        p_world.import<CoreModule>();
 
-        OpenGLContext() = default;
-        OpenGLContext(const OpenGLContext&) = delete;
-        OpenGLContext(OpenGLContext &&p_other);
-        OpenGLContext &operator=(OpenGLContext &&p_other);
-        virtual ~OpenGLContext();
-
-    private:
-        static void _gl_debug_context(GLenum p_source, GLenum p_type, GLuint p_id, GLenum p_severity, GLsizei p_length, const char *p_message, const void *p_user_param);
-
-    private:
-        static int instance_count;
-
-        bool initialized = false;
-    };
+        // Add window singleton
+        p_world.set<Window>(Window(800, 600, ""));
+    }
 }

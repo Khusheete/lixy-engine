@@ -47,9 +47,6 @@ namespace lixy {
 
     class Renderer {
     public:
-        void window_set_title(const std::string &p_title);
-        bool window_should_close();
-
         void set_current_camera(flecs::entity p_camera);
         flecs::entity get_current_camera() const;
 

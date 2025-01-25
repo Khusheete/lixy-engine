@@ -32,6 +32,8 @@
 #include "thirdparty/glm/ext/scalar_constants.hpp"
 #include "thirdparty/glm/fwd.hpp"
 #include "thirdparty/glm/trigonometric.hpp"
+#include "windowing/src/module.hpp"
+#include "windowing/src/window.hpp"
 
 #include <GL/gl.h>
 // #include <array>
@@ -40,7 +42,7 @@
 
 
 void DemoApplication::main_loop() {
-    while (!lixy::Renderer::get_singleton(world)->window_should_close()) {
+    while (!lixy::Window::get_singleton(world)->should_close()) {
         // Update entities
         rotation_angle += world.delta_time() * 0.2 * glm::pi<float>();
 
@@ -59,10 +61,11 @@ void DemoApplication::main_loop() {
 
 DemoApplication::DemoApplication() {
     world.import<lixy::CoreModule>();
+    world.import<lixy::WindowingModule>();
     world.import<lixy::RendererModule>();
 
-    lixy::Renderer *renderer = lixy::Renderer::get_singleton(world);
-    renderer->window_set_title("Demo OpenGL Application");
+    lixy::Window *window = lixy::Window::get_singleton(world);
+    window->set_title("Demo OpenGL Application");
 
     // Load image
     // lixy::EntityRef texture = lixy::Texture::load_texture2d(world, "assets/textures/test.png");
@@ -105,6 +108,8 @@ DemoApplication::DemoApplication() {
     
     // Create camera entity
     camera = lixy::Camera::create(world, {.type = lixy::Camera::Type::PERSPECTIVE});
+
+    lixy::Renderer *renderer = lixy::Renderer::get_singleton(world);
     renderer->set_current_camera(camera);
 }
 

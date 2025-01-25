@@ -6,3 +6,5 @@
 #undef Status
 #undef True
 #undef False
+
+#undef Window

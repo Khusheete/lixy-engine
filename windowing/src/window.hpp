@@ -19,35 +19,38 @@
 #pragma once
 
 
+#include "thirdparty/flecs/flecs.h"
+#include "thirdparty/rgfw/include.hpp"
+
 #include <functional>
-#include <string>
-
-#include "thirdparty/glad/include/glad/glad.h"
-#include <GL/gl.h>
-#include <GL/glext.h>
+#include <string_view>
 
 
-namespace lixy::opengl {
+namespace lixy {
     typedef void(*ProcAddress);
-    typedef ProcAddress(GetProcAddress(const char*));
 
 
-    class OpenGLContext {
-    public:
-        void initialize(GetProcAddress get_proc_address);
+    class Window {
+        public:
+            static Window *get_singleton(flecs::world &p_world);
+            static ProcAddress get_proc_address(const char *p_proc);
 
-        OpenGLContext() = default;
-        OpenGLContext(const OpenGLContext&) = delete;
-        OpenGLContext(OpenGLContext &&p_other);
-        OpenGLContext &operator=(OpenGLContext &&p_other);
-        virtual ~OpenGLContext();
+            void set_as_current_context();
 
-    private:
-        static void _gl_debug_context(GLenum p_source, GLenum p_type, GLuint p_id, GLenum p_severity, GLsizei p_length, const char *p_message, const void *p_user_param);
+            bool should_close();
+            void set_title(const std::string_view &p_title);
+            int32_t get_width() const;
+            int32_t get_height() const;
+            void poll_events();
+            void swap_buffers();
 
-    private:
-        static int instance_count;
+            Window() = default;
+            Window(uint32_t p_width, uint32_t p_height, std::string_view p_name);
+            Window(Window &&p_other);
+            Window &operator=(Window &&p_other);
+            virtual ~Window();
 
-        bool initialized = false;
+        private:
+            RGFW_window *window_ptr = nullptr;
     };
 }

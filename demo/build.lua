@@ -4,7 +4,7 @@ project "Demo"
     cppdialect "c++17"
     
     files { "src/**.hpp", "src/**.cpp" }
-    links { "Renderer", "Flecs", "Stb", "Core", "WavefrontLoader", "glfw", "GL", "glad", "pthread", "dl" }
+    links { "Renderer", "Flecs", "Stb", "Core", "WavefrontLoader", "rgfw", "GL", "glad", "pthread", "dl" }
 
     build_target_dir()
     build_object_dir()
@@ -14,3 +14,7 @@ project "Demo"
     build_target_dir()
 
     build_config()
+
+    filter "platforms:linux"
+        links { "X11", "Xrandr" }
+    filter ""

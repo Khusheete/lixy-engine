@@ -33,8 +33,8 @@
 #include "thirdparty/flecs/flecs.h"
 #include "thirdparty/glm/ext/matrix_clip_space.hpp"
 #include "thirdparty/glm/matrix.hpp"
+#include "thirdparty/rgfw/include.hpp"
 
-#include <GLFW/glfw3.h>
 #include <array>
 #include <memory>
 
@@ -157,8 +157,7 @@ namespace lixy {
             opengl::TextureFormat::RGBA8, // Albedo
             opengl::TextureFormat::RGBA8, // Normal
         };
-        int width, height; // FIXME: width and height should be managed inside the windowing system
-        glfwGetFramebufferSize(context.get_window(), &width, &height);
+        int width = context.window_get_width(), height = context.window_get_height(); // FIXME: width and height should be managed inside the windowing system
         gbuffer_ref = Framebuffer::create(p_world, width, height, g_framebuffer_formats)
             .add(flecs::ChildOf, p_self);
         ASSERT_FATAL_ERROR(gbuffer_ref.get<Framebuffer>()->is_complete(), "Incomplete GBuffer");
@@ -210,11 +209,10 @@ namespace lixy {
             .kind(flecs::PreUpdate)
             .each([](Renderer &rd) {
                 rd.context.set_current();
-                glfwPollEvents();
+                rd.context.window_poll_events();
 
                 // Set viewport size
-                int width, height; // FIXME: width and height should be managed inside the windowing system
-                glfwGetFramebufferSize(rd.context.get_window(), &width, &height);
+                int width = rd.context.window_get_width(), height = rd.context.window_get_height(); // FIXME: width and height should be managed inside the windowing system
                 glViewport(0, 0, width, height); // FIXME: resize when there is a resize event
 
                 // Clear screen
@@ -238,8 +236,7 @@ namespace lixy {
                 const Camera *camera = rd.current_camera.get<Camera>();
                 Transform *camera_transform = rd.current_camera.get_mut<Transform>();
 
-                int width, height; // FIXME: width and height should be managed inside the windowing system
-                glfwGetFramebufferSize(rd.context.get_window(), &width, &height);
+                int width = rd.context.window_get_width(), height = rd.context.window_get_height();
 
                 // Calculate view matrix transform
                 rd.view_matrix = glm::inverse(camera_transform->get_matrix());

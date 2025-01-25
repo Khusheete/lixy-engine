@@ -19,7 +19,7 @@
 #include "context.hpp"
 #include "debug/debug.hpp"
 
-#include <GLFW/glfw3.h>
+#include "thirdparty/rgfw/include.hpp"
 
 
 namespace lixy::opengl {
@@ -27,22 +27,15 @@ namespace lixy::opengl {
 
 
     void OpenGLContext::initialize() {
-        if (instance_count == 0) {
-            ASSERT_FATAL_ERROR(glfwInit(), "Could not initialize glfw");
-        }
-
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
-        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-        window = glfwCreateWindow(800, 600, "", nullptr, nullptr);
+        RGFW_setGLVersion(RGFW_glCore, 4, 4);
+        
+        window = RGFW_createWindow("", RGFW_RECT(0, 0, 800, 600), RGFW_windowCenter);
         ASSERT_FATAL_ERROR(window, "Could not create window");
-        glfwMakeContextCurrent(window);
+        RGFW_window_makeCurrent(window);
 
         // Load OpenGL functions
         if (instance_count == 0) {
-            ASSERT_FATAL_ERROR(gladLoadGLLoader((GLADloadproc)glfwGetProcAddress), "Could not initialize glad");
+            ASSERT_FATAL_ERROR(gladLoadGLLoader((GLADloadproc)RGFW_getProcAddress), "Could not initialize glad");
         }
 
         // Print opengl context information
@@ -130,22 +123,37 @@ namespace lixy::opengl {
 
 
     void OpenGLContext::set_current() {
-        glfwMakeContextCurrent(window);
+        RGFW_window_makeCurrent(window);
     }
 
 
-    void OpenGLContext::window_set_title(const std::string &p_title) {
-        glfwSetWindowTitle(window, p_title.c_str());
+    void OpenGLContext::window_set_title(const std::string_view &p_title) {
+        RGFW_window_setName(window, p_title.data());
     }
 
 
     bool OpenGLContext::window_should_close() {
-        return glfwWindowShouldClose(window);
+        return RGFW_window_shouldClose(window);
+    }
+
+
+    void OpenGLContext::window_poll_events() {
+        while (RGFW_window_checkEvent(window));
     }
 
 
     void OpenGLContext::swap_buffers() {
-        glfwSwapBuffers(window);
+        RGFW_window_swapBuffers(window);
+    }
+
+    
+    int32_t OpenGLContext::window_get_width() const {
+        return window->r.w;
+    }
+    
+    
+    int32_t OpenGLContext::window_get_height() const {
+        return window->r.h;
     }
 
 
@@ -157,7 +165,7 @@ namespace lixy::opengl {
 
     OpenGLContext &OpenGLContext::operator=(OpenGLContext &&p_other) {
         if (window != nullptr) {
-            glfwDestroyWindow(window);
+            RGFW_window_close(window);
             instance_count -= 1;
         }
         
@@ -170,12 +178,7 @@ namespace lixy::opengl {
 
     OpenGLContext::~OpenGLContext() {
         if (!window) return;
-
-        glfwDestroyWindow(window);
-
+        RGFW_window_close(window);
         instance_count -= 1;
-        if (instance_count == 0) {
-            glfwTerminate();
-        }
     }
 }

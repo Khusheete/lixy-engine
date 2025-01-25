@@ -24,7 +24,7 @@
 #include "thirdparty/glad/include/glad/glad.h"
 #include <GL/gl.h>
 #include <GL/glext.h>
-#include <GLFW/glfw3.h>
+#include "thirdparty/rgfw/include.hpp"
 
 
 namespace lixy::opengl {
@@ -36,9 +36,12 @@ namespace lixy::opengl {
         void set_current();
 
         // ===== Window API =====
-        inline GLFWwindow *get_window() { return window; }
-        void window_set_title(const std::string &p_title);
+        inline RGFW_window *get_window() { return window; }
+        void window_set_title(const std::string_view &p_title);
         bool window_should_close();
+        int32_t window_get_width() const;
+        int32_t window_get_height() const;
+        void window_poll_events();
         void swap_buffers();
 
 
@@ -54,6 +57,6 @@ namespace lixy::opengl {
     private:
         static int instance_count;
 
-        GLFWwindow *window = nullptr;
+        RGFW_window *window = nullptr;
     };
 }

@@ -100,12 +100,12 @@ DemoApplication::DemoApplication() {
     // Add lights
     light1 = world.entity()
         .set<lixy::Transform>({})
-        .set<lixy::PointLight>({ .color = glm::vec3(1.0, 0.5, 0.0) })
+        .set<lixy::PointLight>({ .color = glm::vec3(1.0, 0.5, 0.0), .radius = 10.0 })
         .add<lixy::Visible>();
     
     light2 = world.entity()
         .set<lixy::Transform>({})
-        .set<lixy::PointLight>({ .color = glm::vec3(0.0, 0.5, 1.0) })
+        .set<lixy::PointLight>({ .color = glm::vec3(0.0, 0.5, 1.0), .radius = 10.0 })
         .add<lixy::Visible>();
 }
 

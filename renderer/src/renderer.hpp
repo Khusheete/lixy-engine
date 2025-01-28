@@ -74,5 +74,8 @@ namespace lixy {
         std::shared_ptr<opengl::VertexBuffer> quad_vertices;
         std::shared_ptr<opengl::IndexBuffer> quad_indices;
         std::shared_ptr<opengl::VertexArrayBuffer> quad_vao;
+
+        opengl::ShaderStorageBuffer point_lights_storage;
+        opengl::ShaderStorageBuffer point_lights_transform_storage;
     };
 }

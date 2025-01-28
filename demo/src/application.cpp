@@ -23,6 +23,7 @@
 #include "core/src/transform.hpp"
 #include "debug/debug.hpp"
 #include "renderer/src/camera.hpp"
+#include "renderer/src/light.hpp"
 #include "renderer/src/material.hpp"
 #include "renderer/src/mesh.hpp"
 #include "renderer/src/module.hpp"
@@ -44,13 +45,27 @@
 void DemoApplication::main_loop() {
     while (!lixy::Window::get_singleton(world)->should_close()) {
         // Update entities
-        rotation_angle += world.delta_time() * 0.2 * glm::pi<float>();
+        rotation_angle += world.delta_time() * 0.5 * glm::pi<float>();
 
-        lixy::Transform *camera_trasnform = camera.get_mut<lixy::Transform>();
-        camera_trasnform->set_position(glm::vec3(
-            1.0 * glm::cos(rotation_angle),
-            1.0 + 1.0 * glm::sin(rotation_angle),
-            2.0
+        lixy::Transform *transform = light1.get_mut<lixy::Transform>();
+        transform->set_position(glm::vec3(
+            3.0 * glm::cos(rotation_angle),
+            -1.0 + 3.0 * glm::sin(rotation_angle),
+            0.0
+        ));
+
+        transform = light2.get_mut<lixy::Transform>();
+        transform->set_position(glm::vec3(
+            3.0 * glm::cos(-rotation_angle),
+            -1.0 + 3.0 * glm::sin(-rotation_angle),
+            0.0
+        ));
+
+        transform = camera.get_mut<lixy::Transform>();
+        transform->set_position(glm::vec3(
+            0.5 * glm::cos(0.33 * rotation_angle),
+            0.5 * glm::sin(0.33 * rotation_angle),
+            0.0
         ));
 
         // Progress world
@@ -68,26 +83,35 @@ DemoApplication::DemoApplication() {
     window->set_title("Demo OpenGL Application");
 
     // Create mesh
-    lixy::EntityRef shaderball = lixy::ObjMesh::load(world, "assets/models/shaderball.obj");
+    lixy::EntityRef shaderball_mesh = lixy::ObjMesh::load(world, "assets/models/shaderball.obj");
 
     // Create rectangle entity
-    rectangle = world.entity()
-        .set<lixy::Transform>({})
-        .set<lixy::MeshInstance>({shaderball})
+    shaderball = world.entity()
+        .emplace<lixy::Transform>(glm::vec3(0.0, -1.0, -2.5))
+        .set<lixy::MeshInstance>({shaderball_mesh})
         .add<lixy::Visible>();
-    
-    rectangle.get_mut<lixy::Transform>()->set_position(glm::vec3(0.0, 0.0, -1.0));
     
     // Create camera entity
     camera = lixy::Camera::create(world, {.type = lixy::Camera::Type::PERSPECTIVE});
 
     lixy::Renderer *renderer = lixy::Renderer::get_singleton(world);
     renderer->set_current_camera(camera);
+
+    // Add lights
+    light1 = world.entity()
+        .set<lixy::Transform>({})
+        .set<lixy::PointLight>({ .color = glm::vec3(1.0, 0.5, 0.0) })
+        .add<lixy::Visible>();
+    
+    light2 = world.entity()
+        .set<lixy::Transform>({})
+        .set<lixy::PointLight>({ .color = glm::vec3(0.0, 0.5, 1.0) })
+        .add<lixy::Visible>();
 }
 
 
 DemoApplication::~DemoApplication() {
-    rectangle.destruct();
+    shaderball.destruct();
     camera.destruct();
     world.release();
 }

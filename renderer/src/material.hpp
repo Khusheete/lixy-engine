@@ -21,6 +21,7 @@
 
 #include "core/src/ref.hpp"
 #include "renderer/src/primitives/shader.hpp"
+#include "renderer/src/primitives/vbuffer.hpp"
 #include "thirdparty/flecs/flecs.h"
 
 #include <cstring>
@@ -45,7 +46,7 @@ namespace lixy {
             static_assert(sizeof(T) <= 16 * sizeof(uint32_t), "Incorrect uniform size");
             try {
                 memcpy(uniforms.at(p_uniform_name).data, &p_value, sizeof(p_value));
-            } catch (std::out_of_range) {}
+            } catch (std::out_of_range) { LOG_WARNING("Non existant uniform " << p_uniform_name); }
         }
 
         static EntityRef load(flecs::world &p_world, const std::filesystem::path &p_vertex_path, const std::filesystem::path &p_fragment_path);
@@ -74,7 +75,8 @@ namespace lixy {
         std::shared_ptr<opengl::ShaderProgram> program;
         std::unordered_map<std::string, Uniform> uniforms;
         std::unordered_map<std::string, ResourceUniform> resource_uniform; // Resources need to be implemented apart from other uniforms as they require cleanup
-    
+        std::unordered_map<std::string, opengl::ShaderStorageBuffer::Slice> shader_storage_buffer;
+
     private:
         static const std::string MODEL_UNIFORM;
         static const std::string VIEW_UNIFORM;

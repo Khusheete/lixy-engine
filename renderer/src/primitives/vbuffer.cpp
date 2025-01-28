@@ -182,4 +182,75 @@ namespace lixy::opengl {
         if (!array_index) return;
         glDeleteVertexArrays(1, &array_index);
     }
+
+
+    void ShaderStorageBuffer::Slice::bind_to_location(uint32_t p_bind_location) const {
+        if (buffer_id) {
+            glBindBufferRange(GL_SHADER_STORAGE_BUFFER, p_bind_location, buffer_id, offset, size);
+        }
+    }
+
+
+    void ShaderStorageBuffer::bind() const {
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer_id);
+    }
+
+
+    void ShaderStorageBuffer::unbind() const {
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    }
+
+
+    ShaderStorageBuffer::Slice ShaderStorageBuffer::slice(uint32_t p_offset, uint32_t p_size) const {
+        return Slice(buffer_id, p_offset, p_size);
+    }
+
+
+    void ShaderStorageBuffer::allocate(uint32_t p_size) {
+        size = p_size;
+        if (!buffer_id) glCreateBuffers(1, &buffer_id);
+        bind();
+        glBufferData(GL_SHADER_STORAGE_BUFFER, p_size, nullptr, GL_STREAM_READ);
+    }
+
+
+    uint32_t ShaderStorageBuffer::get_size() const {
+        return size;
+    }
+
+
+    void ShaderStorageBuffer::write_data(uint32_t p_offset, uint32_t p_size, void *p_data) {
+        bind();
+        glBufferSubData(GL_SHADER_STORAGE_BUFFER, p_offset, p_size, p_data);
+    }
+
+
+    ShaderStorageBuffer::ShaderStorageBuffer(ShaderStorageBuffer &&p_other) {
+        if (buffer_id) {
+            glDeleteBuffers(1, &buffer_id);
+        }
+
+        buffer_id = p_other.buffer_id;
+        size = p_other.size;
+
+        p_other.buffer_id = 0;
+    }
+
+
+    ShaderStorageBuffer &ShaderStorageBuffer::operator=(ShaderStorageBuffer &&p_other) {
+        if (buffer_id) {
+            glDeleteBuffers(1, &buffer_id);
+        }
+
+        buffer_id = p_other.buffer_id;
+        size = p_other.size;
+
+        p_other.buffer_id = 0;
+        return *this;
+    }
+
+
+    ShaderStorageBuffer::~ShaderStorageBuffer() {
+        if (buffer_id) glDeleteBuffers(1, &buffer_id);
+    }
 }

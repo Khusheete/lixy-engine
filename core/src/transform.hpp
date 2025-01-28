@@ -34,8 +34,12 @@ namespace lixy {
         void translate(const glm::vec3 &p_vector);
 
         glm::mat4 get_matrix();
+        inline glm::vec3 get_local_position() const { return position; }
+        inline glm::quat get_local_rotation() const { return rotation; }
+        inline glm::vec3 get_local_scale() const { return scale; }
 
         Transform() = default;
+        Transform(const glm::vec3 &p_position);
         Transform(const glm::vec3 &p_position, const glm::quat &p_rotation, const glm::vec3 &p_scale);
         Transform(const Transform&) = default;
         Transform &operator=(const Transform&) = default;

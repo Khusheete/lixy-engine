@@ -20,6 +20,9 @@
 
 #include "debug/debug.hpp"
 
+#include "renderer/src/primitives/context.hpp"
+#include "renderer/src/primitives/vbuffer.hpp"
+#include "thirdparty/glm/common.hpp"
 #include "thirdparty/glm/glm.hpp"
 
 #include <algorithm>
@@ -118,8 +121,24 @@ namespace lixy::opengl {
     }
 
 
+    void ShaderProgram::bind_storage_buffer(const std::string &p_storage_buffer_name, const ShaderStorageBuffer::Slice &p_slice) {
+        int32_t location = _get_storage_buffer_location(p_storage_buffer_name);
+        if (location == -1) return;
+        p_slice.bind_to_location(location);
+    }
+
+
     int32_t ShaderProgram::_get_uniform_location(const std::string &p_name) {
         return glGetUniformLocation(program_id, p_name.c_str());
+    }
+
+
+    int32_t ShaderProgram::_get_storage_buffer_location(const std::string &p_storage_buffer_name) {
+        int32_t resource_index = glGetProgramResourceIndex(program_id, GL_SHADER_STORAGE_BLOCK, p_storage_buffer_name.data());
+        uint32_t prop = GL_BUFFER_BINDING;
+        int32_t location;
+        glGetProgramResourceiv(program_id, GL_SHADER_STORAGE_BLOCK, resource_index, 1, &prop, 1, nullptr, &location);
+        return location;
     }
 
 
@@ -145,11 +164,30 @@ namespace lixy::opengl {
         ASSERT_FATAL_ERROR(index >= 0 && index < get_uniform_count(), "Error index out of bounds");
         return uniforms[index].name;
     }
-    
-    
+
+
     ShaderDataType ShaderProgram::get_uniform_type(int index) {
         ASSERT_FATAL_ERROR(index >= 0 && index < get_uniform_count(), "Error index out of bounds");
         return uniforms[index].type;
+    }
+
+
+    int ShaderProgram::get_storage_buffer_count() {
+        return storage_buffers.size();
+    }
+    
+    
+    int ShaderProgram::get_storage_buffer_index(const std::string &p_storage_buffer_name) {
+        for (int i = 0; i < storage_buffers.size(); i++) {
+            if (storage_buffers[i].name == p_storage_buffer_name) return i;
+        }
+        return -1;
+    }
+    
+    
+    const std::string &ShaderProgram::get_storage_buffer_name(int p_index) {
+        ASSERT_FATAL_ERROR(p_index >= 0 && p_index < get_storage_buffer_count(), "Error index out of bounds");
+        return storage_buffers[p_index].name;
     }
 
 
@@ -222,13 +260,20 @@ namespace lixy::opengl {
         glDeleteShader(fragment_shader);
         glDeleteShader(vertex_shader);
 
-        // Get uniforms
+        // Get shader inputs information
         int32_t uniform_count;
         glGetProgramiv(program_id, GL_ACTIVE_UNIFORMS, &uniform_count);
         uniforms.reserve(uniform_count);
-    
-        int32_t max_name_length;
-        glGetProgramiv(program_id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_name_length);
+        int32_t max_uniform_name_length;
+        glGetProgramiv(program_id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_uniform_name_length);
+
+        int32_t ssb_count;
+        glGetProgramInterfaceiv(program_id, GL_SHADER_STORAGE_BLOCK, GL_ACTIVE_RESOURCES, &ssb_count);
+        storage_buffers.reserve(ssb_count);
+        int32_t max_ssb_name_length;
+        glGetProgramInterfaceiv(program_id, GL_SHADER_STORAGE_BLOCK, GL_MAX_NAME_LENGTH, &max_ssb_name_length);
+
+        int32_t max_name_length = glm::max(max_uniform_name_length, max_ssb_name_length);
         std::vector<GLchar> name(max_name_length);
 
         for (int i = 0; i < uniform_count; i++) {
@@ -241,6 +286,16 @@ namespace lixy::opengl {
                 .name = std::string(name.data())
             });
         }
+
+        for (int i = 0; i < ssb_count; i++) {
+            int32_t size;
+            glGetProgramResourceName(program_id, GL_SHADER_STORAGE_BLOCK, i, max_name_length, &size, name.data());
+
+            storage_buffers.push_back(StorageBuffer{
+                .name = std::string(name.data())
+            });
+        }
+
 
         // Record possible errors
         if (creation_error) errors = error_stream.str();

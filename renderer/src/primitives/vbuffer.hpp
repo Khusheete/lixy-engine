@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include "shader.hpp"
 #include "thirdparty/glm/fwd.hpp"
 #include "thirdparty/glad/include/glad/glad.h"
 
@@ -28,6 +27,8 @@
 
 
 namespace lixy::opengl {
+
+    enum class ShaderDataType;
 
     class BufferLayout {
     public:
@@ -102,5 +103,49 @@ namespace lixy::opengl {
 
         std::vector<std::shared_ptr<VertexBuffer>> vertex_buffers;
         std::vector<std::shared_ptr<IndexBuffer>> index_buffers;
+    };
+
+
+    class ShaderStorageBuffer {
+    public:
+        class Slice {
+        public:
+            void bind_to_location(uint32_t p_bind_location) const;
+
+            Slice() = default;
+        private:
+            inline Slice(uint32_t p_buffer_id, uint32_t p_offset, uint32_t p_size)
+                : buffer_id(p_buffer_id),
+                offset(p_offset),
+                size(p_size) {}
+
+        private:
+            uint32_t buffer_id = 0;
+            uint32_t offset;
+            uint32_t size;
+            
+            friend ShaderStorageBuffer;
+        };
+
+    public:
+
+        void bind() const;
+        void unbind() const;
+
+        Slice slice(uint32_t p_offset, uint32_t p_size) const;
+
+        void allocate(uint32_t p_size);
+        uint32_t get_size() const;
+
+        void write_data(uint32_t p_offset, uint32_t p_size, void *p_data);
+
+        ShaderStorageBuffer() = default;
+        ShaderStorageBuffer(ShaderStorageBuffer &&p_other);
+        ShaderStorageBuffer &operator=(ShaderStorageBuffer &&p_other);
+        virtual ~ShaderStorageBuffer();
+    
+    private:
+        uint32_t buffer_id = 0;
+        uint32_t size = 0;
     };
 }

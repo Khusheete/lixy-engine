@@ -213,6 +213,10 @@ namespace lixy::opengl {
             *p_internal_format = GL_RGBA16;
             *p_format = GL_RGBA;
             break;
+        case TextureFormat::RGBA16F:
+            *p_internal_format = GL_RGBA16F;
+            *p_format = GL_RGBA;
+            break;
         }
     }
     

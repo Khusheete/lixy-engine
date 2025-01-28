@@ -20,6 +20,7 @@
 
 #include "core/src/module.hpp"
 #include "renderer/src/framebuffer.hpp"
+#include "renderer/src/light.hpp"
 #include "renderer/src/material.hpp"
 #include "renderer/src/mesh.hpp"
 #include "renderer/src/renderer.hpp"
@@ -44,6 +45,7 @@ namespace lixy {
         p_world.add<MeshInstance>();
         p_world.add<Visible>();
         p_world.add<Framebuffer>();
+        p_world.add<PointLight>();
 
         // Initialize renderer singleton
         flecs::entity rd = p_world.entity<Renderer>();

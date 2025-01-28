@@ -22,6 +22,7 @@
 #include "debug/debug.hpp"
 
 #include "renderer/src/primitives/shader.hpp"
+#include "renderer/src/primitives/vbuffer.hpp"
 #include "renderer/src/texture.hpp"
 
 #include <filesystem>
@@ -83,6 +84,10 @@ namespace lixy {
                 LOG_WARNING("Unimplemented uniform type");
             }
         }
+
+        for (const auto &[name, ssb_slice] : shader_storage_buffer) {
+            program->bind_storage_buffer(name, ssb_slice);
+        }
     }
 
 
@@ -99,7 +104,15 @@ namespace lixy {
     void Material::set_uniform<EntityRef>(const std::string &p_uniform_name, const EntityRef &p_value) {
         try {
             resource_uniform.at(p_uniform_name).resource = p_value;
-        } catch (std::out_of_range) {}
+        } catch (std::out_of_range) { LOG_WARNING("Non existant uniform " << p_uniform_name); }
+    }
+
+
+    template<>
+    void Material::set_uniform<opengl::ShaderStorageBuffer::Slice>(const std::string &p_uniform_name, const opengl::ShaderStorageBuffer::Slice &p_slice) {
+        try {
+            shader_storage_buffer.at(p_uniform_name) = p_slice;
+        } catch (std::out_of_range) { LOG_WARNING("Non existant uniform " << p_uniform_name); }
     }
 
 
@@ -127,7 +140,6 @@ namespace lixy {
         program = std::make_shared<opengl::ShaderProgram>(p_vertex_source, p_fragment_source);
 
         // Get uniforms
-        uniforms.reserve(program->get_uniform_count());
         for (int i = 0; i < program->get_uniform_count(); i++) {
             opengl::ShaderDataType type = program->get_uniform_type(i);
             std::string name = program->get_uniform_name(i);
@@ -159,7 +171,12 @@ namespace lixy {
             case opengl::ShaderDataType::Unknown:
                 LOG_WARNING("Unknown uniform type named: `" << name << "` in shader");
             }
-            
+        }
+
+        // Get Shader Storage Buffers
+        shader_storage_buffer.reserve(program->get_storage_buffer_count());
+        for (int i = 0; i < program->get_storage_buffer_count(); i++) {
+            shader_storage_buffer[program->get_storage_buffer_name(i)] = opengl::ShaderStorageBuffer::Slice();
         }
     }
 }

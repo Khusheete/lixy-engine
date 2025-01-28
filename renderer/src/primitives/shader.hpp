@@ -19,6 +19,7 @@
 #pragma once
 
 #include "debug/debug.hpp"
+#include "renderer/src/primitives/vbuffer.hpp"
 #include "thirdparty/glm/glm.hpp"
 
 #include "thirdparty/glad/include/glad/glad.h"
@@ -159,12 +160,17 @@ namespace lixy::opengl {
         void bind_uniform(const std::string &p_uniform_name, const glm::mat2 &p_value);
         void bind_uniform(const std::string &p_uniform_name, const glm::mat3 &p_value);
         void bind_uniform(const std::string &p_uniform_name, const glm::mat4 &p_value);
+        void bind_storage_buffer(const std::string &p_storage_buffer_name, const ShaderStorageBuffer::Slice &p_slice);
         void unbind() const;
 
         int get_uniform_count();
         int get_uniform_index(const std::string &p_uniform_name);
-        const std::string &get_uniform_name(int index);
-        ShaderDataType get_uniform_type(int index);
+        const std::string &get_uniform_name(int p_index);
+        ShaderDataType get_uniform_type(int p_index);
+
+        int get_storage_buffer_count();
+        int get_storage_buffer_index(const std::string &p_ssb);
+        const std::string &get_storage_buffer_name(int p_index);
 
         bool is_valid() const;
         const std::string &get_errors() const;
@@ -183,13 +189,19 @@ namespace lixy::opengl {
             std::string name;
         };
 
+        struct StorageBuffer {
+            std::string name;
+        };
+
     private:
         int32_t _get_uniform_location(const std::string &p_uniform_name);
+        int32_t _get_storage_buffer_location(const std::string &p_storage_buffer_name);
 
     private:
         uint32_t program_id;
 
         std::vector<Uniform> uniforms;
+        std::vector<StorageBuffer> storage_buffers;
     
         bool creation_error = false;
         std::string errors;

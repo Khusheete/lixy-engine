@@ -23,6 +23,7 @@
 #include "debug/debug.hpp"
 #include "renderer/src/camera.hpp"
 #include "renderer/src/framebuffer.hpp"
+#include "renderer/src/light.hpp"
 #include "renderer/src/material.hpp"
 #include "renderer/src/mesh.hpp"
 
@@ -42,7 +43,7 @@
 namespace lixy {
 
     static const std::string DEFAULT_VERTEX_SHADER =
-        "#version 420 core\n"
+        "#version 430 core\n"
         ""
         "layout(location = 0) in vec3 position;"
         "layout(location = 1) in vec3 normal;"
@@ -57,14 +58,14 @@ namespace lixy {
         "layout(location = 2) out vec2 out_tex_coord;"
         ""
         "void main() {"
-        "    gl_Position = u_projection * u_view * u_model * vec4(position, 1.0);"
-        "    out_position = gl_Position;"
-        "    out_normal = (u_projection * u_view * u_model * vec4(normal, 0.0)).xyz;" // FIXME: project normal
+        "    out_position = u_model * vec4(position, 1.0);"
+        "    gl_Position = u_projection * u_view * out_position;"
+        "    out_normal = mat3(transpose(inverse(u_model))) * normal;"
         "    out_tex_coord = tex_coord;"
         "}";
     
     static const std::string DEFAULT_FRAGMENT_SHADER =
-        "#version 420 core\n"
+        "#version 430 core\n"
         ""
         "layout(location = 0) in vec4 position;"
         "layout(location = 1) in vec3 normal;"
@@ -81,17 +82,17 @@ namespace lixy {
         "void main() {"
         "    out_position = position;"
         "    out_color = texture(u_albedo_texture, u_albedo_offset.xy + tex_coord * u_albedo_scale.xy);"
-        "    out_normal = vec4(normalize(normal), 1.0);" // FIXME: use a vec3 - currently using a vec3 gives nonsense images
+        "    out_normal = vec4(normalize(normal), 1.0);"
         "}";
 
 
     static const std::string SCREEN_VERTEX_SHADER =
-        "#version 420 core\n"
+        "#version 430 core\n"
         ""
         "layout(location = 0) in vec2 position;"
         "layout(location = 1) in vec2 uv;"
         ""
-        "layout(location = 1) out vec2 out_uv;"
+        "layout(location = 0) out vec2 out_uv;"
         ""
         "void main() {"
         "    gl_Position = vec4(position, 0.0, 1.0);"
@@ -99,9 +100,25 @@ namespace lixy {
         "}";
 
     static const std::string SCREEN_FRAGMENT_SHADER =
-        "#version 420 core\n"
+        "#version 430 core\n"
         ""
-        "layout(location = 1) in vec2 uv;"
+        "layout(location = 0) in vec2 uv;"
+        ""
+        "struct PointLight {"
+        "    float r;" // Separate the color elements for better struct alignment
+        "    float g;"
+        "    float b;"
+        "    float energy;"
+        "    float radius;"
+        "};"
+        ""
+        "layout(std430, binding = 0) readonly buffer PointLightsData {"
+        "    PointLight point_lights_data[];"
+        "};"
+        ""
+        "layout(std430, binding = 1) readonly buffer PointLightsPosition {"
+        "    vec4 point_lights_position[];"
+        "};"
         ""
         "layout(location = 0) out vec4 out_color;"
         ""
@@ -110,7 +127,22 @@ namespace lixy {
         "uniform sampler2D u_normal;"
         ""
         "void main() {"
-        "    out_color = texture(u_color, uv);"
+        "    vec3 position = texture(u_position, uv).rgb;"
+        "    vec3 color = texture(u_color, uv).rgb;"
+        "    vec3 normal = texture(u_normal, uv).rgb;"
+        ""
+        "    vec3 lighting = 0.1 * color;"
+        ""
+        "    for (int i = 0; i < point_lights_data.length(); i++) {"
+        "        vec3 light_screen_position = point_lights_position[i].xyz;"
+        "        vec3 light_direction = normalize(light_screen_position - position);"
+        ""
+        "        vec3 light_color = vec3(point_lights_data[i].r, point_lights_data[i].g, point_lights_data[i].b);"
+        "        vec3 diffuse = max(dot(normal, light_direction), 0.0) * light_color * color * point_lights_data[i].energy;"
+        "        lighting += diffuse;"
+        "    }"
+        ""
+        "    out_color = vec4(lighting, 1.0);"
         "}";
 
 
@@ -144,9 +176,9 @@ namespace lixy {
         // Create gbuffer
         {
             std::vector<opengl::TextureFormat> g_framebuffer_formats = {
-                opengl::TextureFormat::RGBA8, // Position
-                opengl::TextureFormat::RGBA8, // Albedo
-                opengl::TextureFormat::RGBA8, // Normal
+                opengl::TextureFormat::RGBA16F, // Position
+                opengl::TextureFormat::RGBA16F, // Albedo
+                opengl::TextureFormat::RGBA16F, // Normal
             };
             Window *window = p_world.get_mut<Window>();
             int width = window->get_width(), height = window->get_height();
@@ -265,20 +297,65 @@ namespace lixy {
                     mesh->record_draw(rd.projection_matrix, rd.view_matrix, p_transform.get_matrix());
                 }
             });
-        
-        p_world.system<Renderer, Window>("End Frame")
-            .term_at(0).singleton()
-            .term_at(1).singleton()
+
+
+        p_world.system("Draw Lights And Present")
             .kind(flecs::OnStore)
-            .each([](Renderer &rd, Window &window) {
+            .immediate()
+            .run([](flecs::iter &it) {
+                Renderer *rd = it.world().get_mut<Renderer>();
+                Window *window = it.world().get_mut<Window>();
+
+                // Render to the main window
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-                rd.screen_material.bind_material();
-                rd.quad_vao->bind();
-                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-                rd.quad_vao->unbind();
+                // Fetch point lights data
+                flecs::query<PointLight, Transform> point_light_query = it.world().query_builder<PointLight, Transform>()
+                    .with<Visible>()
+                    .cached()
+                    .build();
 
-                window.swap_buffers();
+                int32_t point_light_count = point_light_query.count();
+                int32_t light_buffer_size = point_light_count * sizeof(PointLight);
+                int32_t light_transform_buffer_size = point_light_count * sizeof(glm::vec4);
+
+                if (rd->point_lights_storage.get_size() < light_buffer_size) {
+                    rd->point_lights_storage.allocate(light_buffer_size);
+                }
+                if (rd->point_lights_transform_storage.get_size() < light_transform_buffer_size) {
+                    rd->point_lights_transform_storage.allocate(light_transform_buffer_size);
+                }
+
+                point_light_query.run([&rd, point_light_count, light_transform_buffer_size](flecs::iter &it) {
+                    int32_t point_light_total = 0;
+
+                    std::vector<glm::vec4> transform_buffer;
+                    transform_buffer.reserve(point_light_count);
+
+                    while (it.next()) {
+                        auto point_lights = it.field<PointLight>(0);
+                        rd->point_lights_storage.write_data(point_light_total * sizeof(PointLight), it.count() * sizeof(PointLight), &*point_lights);
+
+                        auto transforms = it.field<Transform>(1);
+                        for (int32_t i = 0; i < it.count(); i++) {
+                            transform_buffer[point_light_total + i] = glm::vec4(transforms[i].get_local_position(), 1.0);
+                        }
+
+                        point_light_total += it.count();
+                    }
+
+                    rd->point_lights_transform_storage.write_data(0, light_transform_buffer_size, transform_buffer.data());
+                });
+
+                // Render the lit scene to the screen fbo
+                rd->screen_material.set_uniform("PointLightsData", rd->point_lights_storage.slice(0, light_buffer_size));
+                rd->screen_material.set_uniform("PointLightsPosition", rd->point_lights_transform_storage.slice(0, light_transform_buffer_size));
+                rd->screen_material.bind_material();
+                rd->quad_vao->bind();
+                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+                rd->quad_vao->unbind();
+
+                window->swap_buffers();
             });
     }
 }

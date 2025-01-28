@@ -37,8 +37,10 @@ public:
 private:
     flecs::world world;
 
-    flecs::entity rectangle;
+    flecs::entity shaderball;
     flecs::entity camera;
+    flecs::entity light1;
+    flecs::entity light2;
 
     float rotation_angle = 0.0;
 };

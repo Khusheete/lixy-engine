@@ -67,36 +67,8 @@ DemoApplication::DemoApplication() {
     lixy::Window *window = lixy::Window::get_singleton(world);
     window->set_title("Demo OpenGL Application");
 
-    // Load image
-    // lixy::EntityRef texture = lixy::Texture::load_texture2d(world, "assets/textures/test.png");
-    // ASSERT_FATAL_ERROR(texture.get<lixy::Texture>()->is_valid(), "Image not valid");
-
-    // Create material
-    // lixy::EntityRef material = lixy::Material::load(world, "assets/shaders/shader.vert", "assets/shaders/shader.frag");
-    // lixy::Material *material_component = material.get_mut<lixy::Material>();
-    // ASSERT_FATAL_ERROR(
-    //     material_component->is_valid(),
-    //     "Failed to load shaders" << material_component->get_errors()
-    // );
-    // material_component->set_uniform("u_color", glm::vec3(1.0, 0.0, 1.0));
-    // material_component->set_uniform("u_texture", texture);
-
     // Create mesh
     lixy::EntityRef shaderball = lixy::ObjMesh::load(world, "assets/models/shaderball.obj");
-
-    // std::vector<lixy::Vertex> vertices = {
-    //     {{-0.5f, -0.5f, 0.0f}, {0.0, 0.0}},
-    //     {{ 0.5f, -0.5f, 0.0f}, {1.0, 0.0}},
-    //     {{-0.5f,  0.5f, 0.0f}, {0.0, 1.0}},
-    //     {{ 0.5f,  0.5f, 0.0f}, {1.0, 1.0}},
-    // };
-
-    // std::vector<uint32_t> indices {
-    //     0, 1, 2, 2, 3, 1
-    // };
-
-    // lixy::EntityRef mesh = lixy::ArrayMesh::create(world);
-    // mesh.get_mut<lixy::ArrayMesh>()->add_surface(vertices, indices, material);
 
     // Create rectangle entity
     rectangle = world.entity()

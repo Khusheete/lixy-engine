@@ -119,7 +119,6 @@ namespace lixy::opengl {
         p_vertex_buffer->bind();
         
         for (uint32_t i = 0; i < p_buffer_layout.get_layout_length(); i++) {
-            // FIXME: `index` argument corruption. mesa-driver bug ?
             uint32_t index = vertex_attrib_count + i;
             glVertexAttribPointer(
                 index,
